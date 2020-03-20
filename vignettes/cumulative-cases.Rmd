@@ -46,7 +46,7 @@ selected_countries <- c("China",
 ```
 
 
-```{r get-latest-data}
+```{r get-latest-data-highlight}
 library(gghighlight)
 ggplot(data = high_incidence_countries,
          aes(x = normalised_date, 

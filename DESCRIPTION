@@ -26,9 +26,13 @@ Imports:
     stringr,
     lubridate,
     magrittr,
-    countrycode
+    countrycode,
+    janitor,
+    stats
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    gghighlight,
+    ggplot2
 VignetteBuilder: knitr
 RoxygenNote: 7.1.0

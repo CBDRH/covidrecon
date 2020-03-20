@@ -4,7 +4,7 @@ output: github_document
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-```{r, include = FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -38,3 +38,71 @@ devtools::install_github("CBDRH/COVIDreconnoitR")
 library(covidrecon)
 ## basic example code
 ```
+
+```{r get-latest-data}
+provinces_confirmed_jh <- covid_pull_data()
+provinces_confirmed_jh
+```
+
+```{r high-incidence-countries}
+library(dplyr)
+high_incidence_countries <- covid_high_incidence(provinces_confirmed_jh) %>% 
+  mutate(alpha = ifelse(country_region == "Australia", 1, 0.7)) %>% 
+  filter(normalised_date >= 0)
+
+high_incidence_countries
+```
+
+
+```{r plot}
+library(ggplot2)
+ggplot(data = high_incidence_countries,
+         aes(x = normalised_date, 
+             y = cumulative_cases,
+             colour = country_region)) +
+  geom_line(aes(alpha = alpha),
+            size = 1.2) +
+  scale_y_log10() +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+
+```{r highlight-selected-countries}
+library(gghighlight)
+selected_countries <- c("China",
+                        "Singapore",
+                        "Japan",
+                        "Iran",
+                        "Italy",
+                        "Spain",
+                        "US",
+                        "United Kingdom",
+                        "Australia",
+                        "France",
+                        "Korea, South")
+
+ggplot(data = high_incidence_countries,
+         aes(x = normalised_date, 
+             y = cumulative_cases,
+             colour = country_region)) +
+  # geom_line(aes(alpha = alpha), 
+  #           size = 1.2) +
+  geom_line() + 
+   facet_wrap(~ continent, ncol = 2) +
+  scale_y_log10() +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  gghighlight(
+      country_region %in% c(
+        selected_countries
+      ),
+      label_params = list(size = 2,
+                          nudge_y = 10,
+                          segment.alpha = 0.2),
+      calculate_per_facet = TRUE,
+      use_group_by = FALSE
+    )
+
+```
+
