@@ -1,0 +1,74 @@
+---
+title: "cumulative-cases"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{cumulative-cases}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r libraries}
+library(covidrecon)
+library(dplyr)
+library(ggplot2)
+```
+
+```{r get-latest-data}
+provinces_confirmed_jh <- covid_pull_data()
+```
+
+```{r high-incidence-countries}
+high_incidence_countries <- covid_high_incidence(provinces_confirmed_jh) %>% 
+  mutate(alpha = ifelse(country_region == "Australia", 1, 0.7)) %>% 
+  filter(normalised_date >= 0)
+```
+
+```{r select-countries}
+selected_countries <- c("China",
+                        "Singapore",
+                        "Japan",
+                        "Iran",
+                        "Italy",
+                        "Spain",
+                        "US",
+                        "United Kingdom",
+                        "Australia",
+                        "France",
+                        "Korea, South")
+
+```
+
+
+```{r get-latest-data}
+library(gghighlight)
+ggplot(data = high_incidence_countries,
+         aes(x = normalised_date, 
+             y = cumulative_cases,
+             colour = country_region)) +
+  # geom_line(aes(alpha = alpha), 
+  #           size = 1.2) +
+  geom_line() + 
+   facet_wrap(~ continent, ncol = 2) +
+  scale_y_log10() +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  gghighlight(
+      country_region %in% c(
+        selected_countries
+      ),
+      label_params = list(size = 2,
+                          nudge_y = 10,
+                          segment.alpha = 0.2),
+      calculate_per_facet = TRUE,
+      use_group_by = FALSE
+    )
+
+```
+

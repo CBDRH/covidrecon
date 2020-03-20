@@ -1,18 +1,27 @@
+---
+output: github_document
+---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
 
 # covidrecon
 
 <!-- badges: start -->
-
 <!-- badges: end -->
 
 R tools for monitoring effectiveness of COVID-19 control efforts
 
 <!-- COVID-19 + RECON suite of tools for outbreak epidemiology + R = COVIDreconoitR -->
-
-COVID-19 + RECON suite of tools for outbreak epidemiology + R =
-covidrecon
+COVID-19 + RECON suite of tools for outbreak epidemiology + R = covidrecon
 
 ## Installation
 
@@ -22,10 +31,10 @@ The development version from [GitHub](https://github.com/) with:
 # install.packages("devtools")
 devtools::install_github("CBDRH/COVIDreconnoitR")
 ```
-
 ## Example
 
-``` r
+
+```{r example}
 library(covidrecon)
 ## basic example code
 ```

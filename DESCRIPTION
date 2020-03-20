@@ -1,0 +1,34 @@
+Package: covidrecon
+Title: Pulls and Analyses COVID data
+Version: 0.0.0.9000
+Authors@R: c(
+    person(given = "Timothy",
+           family = "Churches",
+           role = "aut"),
+    person(given = "Nicholas",
+           family = "Tierney",
+           role = c("aut", "cre"),
+           email = "nicholas.tierney@gmail.com",
+           comment = c(ORCID = "https://orcid.org/0000-0003-1460-8722"))
+           )
+Description: Simplifies getting COVID19 data and provides
+  data visualisations.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Language: es
+LazyData: true
+Roxygen: list(markdown = TRUE)
+Imports: 
+    readr,
+    tibble,
+    dplyr,
+    tidyr,
+    stringr,
+    lubridate,
+    magrittr,
+    countrycode
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+RoxygenNote: 7.1.0
