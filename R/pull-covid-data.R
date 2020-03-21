@@ -55,3 +55,16 @@ covid_pull_data <- function(){
     add_continent()
 
 }
+
+
+#' Filter covid countries to provided countries
+#'
+#' @param data covid19 data
+#' @param countries vector of countries
+#'
+#' @return dataset filtered to existing countries
+#' @export
+covid_filter_countres <- function(data, countries){
+  data %>%
+    dplyr::filter(country_region %in% countries)
+}

@@ -13,6 +13,10 @@ globalVariables(
     "province",
     "province_state",
     "rnum",
-    "summarise"
+    "summarise",
+    "clabel_value",
+    "clabel_x",
+    "clabel_y",
+    "normalised_date"
     )
   )

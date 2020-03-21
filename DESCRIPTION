@@ -28,7 +28,8 @@ Imports:
     magrittr,
     countrycode,
     janitor,
-    stats
+    stats,
+    scales
 Suggests: 
     knitr,
     rmarkdown,

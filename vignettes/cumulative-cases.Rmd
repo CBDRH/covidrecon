@@ -48,27 +48,98 @@ selected_countries <- c("China",
 
 ```{r get-latest-data-highlight}
 library(gghighlight)
-ggplot(data = high_incidence_countries,
-         aes(x = normalised_date, 
-             y = cumulative_cases,
-             colour = country_region)) +
-  # geom_line(aes(alpha = alpha), 
-  #           size = 1.2) +
-  geom_line() + 
-   facet_wrap(~ continent, ncol = 2) +
-  scale_y_log10() +
+
+gg_covid_cumulative(high_incidence_countries)
+
+high_incidence_countries %>% 
+  covid_filter_countres(c("Australia",
+                          "Italy")) %>% 
+  add_country_label() %>% 
+  gg_covid_cumulative() +
+  geom_covid_country_label() +
+  scale_x_continuous(expand = expansion(add = c(1, 3)))
+```
+
+```{r}
+highlight_countries <- c("Japan",
+                         "Korea, South",
+                         "Singapore",
+                         "Italy",
+                         "Iran",
+                         "China",
+                         "France",
+                         "United Kingdom",
+                         "Sweden",
+                         "Australia")
+
+high_incidence_countries_extra <- high_incidence_countries %>%
+  covid_highlight_australia_plus(plus = highlight_countries) %>% 
+  add_country_label() %>% 
+  filter(normalised_date >= 0,
+         country_region != "Cruise Ship")
+```
+
+```{r}
+gg <- 
+ggplot(
+  data = high_incidence_countries_extra,
+  aes(
+    x = normalised_date,
+    y = cumulative_cases,
+    colour = country_region,
+    alpha = alpha,
+    # tooltip = country_region,
+    # data_id = country_region
+  )
+) +
+  geom_line() +
+  geom_covid_country_label() +
+  scale_y_log10(labels = scales::comma) +
+  scale_alpha(range = c(0.2, 1)) +
+  # scale_x_continuous(expand = expansion(add = c(1, 3))) +
   theme_minimal() +
   theme(legend.position = "none") +
-  gghighlight(
-      country_region %in% c(
-        selected_countries
-      ),
-      label_params = list(size = 2,
-                          nudge_y = 10,
-                          segment.alpha = 0.2),
-      calculate_per_facet = TRUE,
-      use_group_by = FALSE
+  labs(
+    y = "Cumulative cases (logarithmic scale)",
+    x = "Days since cumulative cases exceeded 100",
+    title = paste("COVID-19 epidemic trajectories up to", format(
+      max(high_incidence_countries_extra$date), "%d %B %Y"
+    )),
+    subtitle = "(click on a line to identify country)",
+    caption = paste0(
+      "CC-BY-SA-NC Tim Churches (UNSW) & Nick Tierney (Monash)\n",
+      "Data source: Johns Hopkins University"
     )
+  )
 
+gg
+```
+
+
+
+```{r eval = FALSE}
+library(lubridate)
+
+gg + 
+  geom_line_interactive(size = 1.2) %>% 
+girafe(ggobj = .,
+       options = list(
+         opts_tooltip(use_stroke = TRUE, opacity = 0.7),
+         opts_hover(css = "stroke:black;"),
+         opts_toolbar(position = "topright", saveaspng = TRUE)
+       ))
+
+hubei_incidence_function_data <- provinces_confirmed_jh %>%
+      filter(date >= ymd("2020-01-11")) %>% 
+      mutate(HubeiSansWuhan = if_else(
+        condition = is.na(HubeiSansWuhan), 
+        true = 0, 
+        false = HubeiSansWuhan)) %>%
+      mutate(incident_cases = ifelse(Date < ymd("2020-02-15"),
+                                     Wuhan + HubeiSansWuhan, Hubei)) %>% mutate(date = format(date, 
+    "%Y-%m-%d")) %>% 
+    select(Date, incident_cases) 
+    %>% uncount(incident_cases)
+hubei_incidence_object <- incidence(hubei_incidence_function_data$Date)
 ```
 
