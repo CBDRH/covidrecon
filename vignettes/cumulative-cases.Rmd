@@ -1,5 +1,5 @@
 ---
-title: "cumulative-cases"
+title: "Reproducing the COVID-19 semi-log greater than 100 cumulative cases graph"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{cumulative-cases}
@@ -20,12 +20,14 @@ library(dplyr)
 library(ggplot2)
 ```
 
+https://blog.grattan.edu.au/2020/03/australian-governments-can-choose-to-slow-the-spread-of-coronavirus-but-they-must-act-immediately/
+
 ```{r get-latest-data}
-provinces_confirmed_jh <- covid_pull_data()
+jhu_covid_cumulative_cases <- covid_pull_data()
 ```
 
 ```{r high-incidence-countries}
-high_incidence_countries <- covid_high_incidence(provinces_confirmed_jh) %>% 
+high_incidence_countries <- covid_high_incidence(jhu_covid_cumulative_cases) %>% 
   mutate(alpha = ifelse(country_region == "Australia", 1, 0.7)) %>% 
   filter(normalised_date >= 0)
 ```

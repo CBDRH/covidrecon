@@ -3,12 +3,24 @@
 #' @return dataframe
 #' @export
 covid_read <- function(){
-  readr::read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv",
-           col_types = readr::cols(
-             .default = readr::col_double(),
-             `Province/State` = readr::col_character(),
-             `Country/Region` = readr::col_character()
-           ))
+  # code adapted from https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide
+
+  fetch_ecdc_data <- function(date_to_try) {
+    url <- paste("https://www.ecdc.europa.eu/sites/default/files/documents/COVID-19-geographic-disbtribution-worldwide-", format(date_to_try, "%Y-%m-%d"), ".xlsx", sep = "")
+    # download the dataset from the website to a local temporary file
+    GET(url, authenticate(":", ":", type="ntlm"), write_disk(tf <- tempfile(fileext = ".xlsx")))
+    #read the Dataset sheet and return the data frame
+    df <- read_excel(tf)
+    message(paste("Successfully obtained data for", format(date_to_try, "%Y-%m-%d")))
+    return(df)
+  }
+
+  # first try today's date
+  ecdc_data <- tryCatch(fetch_ecdc_data(Sys.time()),
+                        error=function(c) {
+                          message(paste("Unable to obtain data file for", format(Sys.time(), "%Y-%m-%d")))
+                        })
+  return(ecdc_data)
 }
 
 #' clean variable names of covid19 raw data (from `covid_read`)
