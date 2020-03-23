@@ -67,7 +67,9 @@ latest_covid <- function(){
           " to ",
           max(latest_data$DateRep), " UTC")
 
-  return(latest_data)
+  tidy_covid <- tibble::as_tibble(latest_data,
+                                  .name_repair = janitor::make_clean_names)
+  return(tidy_covid)
 }
 
 
