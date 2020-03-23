@@ -9,7 +9,7 @@
 #'
 #' @return data.frame
 #' @export
-covid_pull_ecdc <- function(date){
+covid_ecdc <- function(date){
   url <- glue_date(date)
   httr::GET(url = url,
       config = httr::authenticate(":", ":", type="ntlm"),
@@ -23,16 +23,16 @@ covid_pull_ecdc <- function(date){
 #'
 #' @return list of yesterdays and today's COVID19 data
 #' @export
-try_covid_yesterday_today <- function(){
+try_ecdc <- function(){
 
   todays_date <- format(lubridate::today(tz = "CET"), "%Y-%m-%d")
-  yesterday <- format(lubridate::today(tz = "CET") - 2L, "%Y-%m-%d")
+  yesterday <- format(lubridate::today(tz = "CET") - 1L, "%Y-%m-%d")
 
-  safe_covid_pull_ecdc <- purrr::safely(covid_pull_ecdc)
+  safe_covid_ecdc <- purrr::safely(covid_ecdc)
   purrr::flatten(
     list(
-      today = discard_null(safe_covid_pull_ecdc(todays_date)),
-      yesterday = discard_null(safe_covid_pull_ecdc(yesterday))
+      today = discard_null(safe_covid_ecdc(todays_date)),
+      yesterday = discard_null(safe_covid_ecdc(yesterday))
       )
   )
 }
@@ -43,9 +43,9 @@ try_covid_yesterday_today <- function(){
 #'
 #' @return data.frame
 #' @export
-latest_covid <- function(){
+covid_latest <- function(){
 
-  data <- try_covid_yesterday_today()
+  data <- try_ecdc()
 
   # if we have data for both, take the latest date
   if ( all(inherits_data_frames(data)) ) {
@@ -67,7 +67,16 @@ latest_covid <- function(){
           " to ",
           max(latest_data$date_rep), " UTC")
 
-  return(latest_data)
+  tidy_covid <- latest_data %>%
+    dplyr::rename(date = date_rep,
+                  country_region = countries_and_territories) %>%
+    # dplyr::arrange(country_region, desc(date)) %>%
+    dplyr::arrange(date) %>%
+    dplyr::group_by(country_region) %>%
+    dplyr::mutate(cumulative_cases = cumsum(cases)) %>%
+    dplyr::ungroup()
+
+  return(tidy_covid)
 }
 
 

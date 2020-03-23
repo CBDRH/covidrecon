@@ -33,7 +33,8 @@ Imports:
     readxl,
     httr,
     glue,
-    purrr
+    purrr,
+    rlang
 Suggests: 
     knitr,
     rmarkdown,

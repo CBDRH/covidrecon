@@ -2,7 +2,7 @@
 #'
 #' @return dataframe
 #' @export
-covid_read <- function(){
+covid_jhu_read <- function(){
   readr::read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv",
            col_types = readr::cols(
              .default = readr::col_double(),
@@ -17,7 +17,7 @@ covid_read <- function(){
 #'
 #' @return data.frame with tidied names
 #' @export
-covid_clean_names <- function(x){
+covid_jhu_clean_names <- function(x){
   x %>%
     tibble::as_tibble(.name_repair = janitor::make_clean_names) %>%
     dplyr::rename(province = province_state)
@@ -29,7 +29,7 @@ covid_clean_names <- function(x){
 #'
 #' @return longer form pivoted data
 #' @export
-covid_pivot_longer <- function(x){
+covid_jhu_pivot_longer <- function(x){
   tidyr::pivot_longer(data = x,
                       cols = -c(province:long),
                       names_to = "date",
@@ -41,18 +41,18 @@ covid_pivot_longer <- function(x){
 #'
 #' @return covid19 data with columns..
 #' @export
-covid_pull_data <- function(){
-  covid_read() %>%
-    covid_clean_names() %>%
-    covid_pivot_longer() %>%
-    dplyr::mutate(date = covid_clean_date(date)) %>%
+covid_jhu <- function(){
+  covid_jhu_read() %>%
+    covid_jhu_clean_names() %>%
+    covid_jhu_pivot_longer() %>%
+    dplyr::mutate(date = covid_jhu_clean_date(date)) %>%
     dplyr::arrange(country_region,
                    province,
                    date) %>%
     dplyr::group_by(country_region, province) %>%
     dplyr::mutate(incident_cases = c(0, diff(cumulative_cases))) %>%
     dplyr::ungroup() %>%
-    add_continent()
+    add_continent(country_source = country_region)
 
 }
 
@@ -64,7 +64,7 @@ covid_pull_data <- function(){
 #'
 #' @return dataset filtered to existing countries
 #' @export
-covid_filter_countres <- function(data, countries){
+covid_jhu_filter_countres <- function(data, countries){
   data %>%
     dplyr::filter(country_region %in% countries)
 }

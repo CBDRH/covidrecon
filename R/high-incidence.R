@@ -8,13 +8,13 @@ covid_high_incidence <- function(covid_data){
 
   incidence_countries <- covid_data %>%
   dplyr::group_by(country_region, date) %>%
-  dplyr::summarise(incident_cases = sum(incident_cases),
-            cumulative_cases = sum(cumulative_cases))
+  dplyr::summarise(cases = sum(cases),
+                   cumulative_cases = sum(cumulative_cases))
 
 incidence_global <- covid_data %>%
   dplyr::group_by(date) %>%
-  dplyr::summarise(incident_cases = sum(incident_cases),
-            cumulative_cases = sum(cumulative_cases))
+  dplyr::summarise(cases = sum(cases),
+                   cumulative_cases = sum(cumulative_cases))
 
 # find dates on which 100 cumulative cases occurred
 high_incidence_countries <- incidence_countries %>%
@@ -23,7 +23,11 @@ high_incidence_countries <- incidence_countries %>%
          hit_100 = dplyr::if_else(
            condition = (cumulative_cases >= 100) & (lag_cum_cases < 100),
            true = TRUE,
-           false = FALSE))
+           false = FALSE)) %>%
+  dplyr::mutate(hit_100 = ifelse(country_region == "China" & date == min(date),
+                                 TRUE,
+                                 hit_100))
+
 
 high_incidence_countries <-
   dplyr::left_join(x = high_incidence_countries,
@@ -54,7 +58,7 @@ high_incidence_countries <-
             by = "country_region") %>%
   dplyr::mutate(normalised_date = rnum - offset) %>%
   dplyr::select(-c(lag_cum_cases, over_100, offset)) %>%
-  add_continent()
+  add_continent(country_source = country_region)
 
 return(high_incidence_countries)
 }
