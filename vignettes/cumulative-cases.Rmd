@@ -194,65 +194,86 @@ library(changepoint)
 change_dates <- tibble(country_region = character(0),
                        ChangeDate = lubridate::ymd())
 
-# for (country in unique(high_incidence_countries$country_region)) {
-
-  ts <- high_incidence_countries %>%
-  # filter(country_region == country) %>%
-  filter(country_region == "Australia") %>%
-  pull(cases)
-
- cpt <- cpt.meanvar(ts,class=FALSE)["cpt"]
- 
-  changedate <- high_incidence_countries %>%
-     # filter(country_region == country) %>%
-     filter(country_region == "Australia") %>%
-     slice(cpt) %>%
-     select(country_region, Date) %>%
-     rename(ChangeDate = Date)
-
-  change_dates <- change_dates %>%
-    bind_rows(changedate)
+extract_change_point_mean_var <- function(data){
+  cpt.meanvar(data$cases, class = FALSE)["cpt"]
 }
 
-high_incidence_countries <- high_incidence_countries %>% 
-  left_join(change_dates)
+high_incidence_changes <-
+    high_incidence_countries %>%
+    group_by(country_region) %>%
+    mutate(n_obs = vctrs::vec_size(country_region)) %>% 
+    # remove countries with only 4 observations
+    filter(n_obs > 4) %>% 
+    ungroup() %>% 
+    group_nest(country_region) %>% 
+    mutate(change_date = map_dbl(data, extract_change_point_mean_var)) %>% 
+      unnest(cols = c(data))  %>% 
+      select(country_region,
+             date,
+             normalised_date,
+             change_date) %>% 
+      filter(normalised_date == change_date) %>% 
+  left_join(x = high_incidence_countries,
+            y = .)
 
 ```
 
 ```{r, fig.width=8, fig,height=16}
-high_incidence_countries %>% 
-  filter(country_region %in% c(highlight_countries, "US", "Germany", "Denmark")) %>%
-  left_join(change_dates) %>%
-  ggplot(aes(x=Date, y=incident_cases)) +
+high_incidence_changes %>% 
+  filter(country_region %in% c(highlight_countries, 
+                               "US", 
+                               "Germany", 
+                               "Denmark")) %>%
+  # left_join(change_dates) %>%
+  ggplot(aes(x = date, 
+             y = cases)) +
     geom_line() +
-    geom_vline(aes(xintercept=ChangeDate)) +
-    facet_grid(country_region~., scales="free_y")
+    geom_vline(aes(xintercept = change_date)) +
+    facet_grid(country_region ~ ., 
+               scales = "free_y")
 ```
 
 ## The "Grattan Institute" plot
 
 ```{r, layout="l-page"}
-gg <- high_incidence_countries %>%
+gg <- high_incidence_changes %>%
   filter(normalised_date >= 0,
          country_region != "Cruise Ship") %>%
-  ggplot(aes(x=normalised_date, y=cumulative_cases, 
-             colour=country_region, alpha=alpha, 
-             tooltip=country_region,
-             data_id=country_region)) +
-  geom_line_interactive(size=1.2) + 
-  geom_label(aes(x=clabel_x, y=clabel_y, label=clabel_value),
-             hjust = 0, nudge_x = 0.2) +
-  scale_y_log10(labels=scales::comma) +
-  scale_alpha(range=c(0.2, 1)) +
-  expand_limits(x=c(0, max(high_incidence_countries$normalised_date) + 5)) +
+  ggplot(
+    aes(
+      x = normalised_date,
+      y = cumulative_cases,
+      colour = country_region,
+      alpha = alpha,
+      tooltip = country_region,
+      data_id = country_region
+    )
+  ) +
+  geom_line_interactive(size = 1.2) +
+  geom_label(
+    aes(x = clabel_x, y = clabel_y, label = clabel_value),
+    hjust = 0,
+    nudge_x = 0.2
+  ) +
+  scale_y_log10(labels = scales::comma) +
+  scale_alpha(range = c(0.2, 1)) +
+  expand_limits(x = c(0, max(
+    high_incidence_changes$normalised_date
+  ) + 5)) +
   theme_minimal() +
   theme(legend.position = "none") +
-  labs(y="Cumulative cases (logarithmic scale)",
-       x="Days since cumulative cases exceeded 100",
-       title=paste("COVID-19 epidemic trajectories up to", format(max(high_incidence_countries$Date), "%d %B %Y")),
-       subtitle="(click on a line to identify country)",
-       caption=paste0("CC BY-NC-SA Tim Churches (UNSW)\n",
-                "Data source: Johns Hopkins University"))
+  labs(
+    y = "Cumulative cases (logarithmic scale)",
+    x = "Days since cumulative cases exceeded 100",
+    title = paste("COVID-19 epidemic trajectories up to", format(
+      max(high_incidence_changes$date), "%d %B %Y"
+    )),
+    subtitle = "(click on a line to identify country)",
+    caption = paste0(
+      "CC BY-NC-SA Tim Churches (UNSW)\n",
+      "Data source: Johns Hopkins University"
+    )
+  )
 
 girafe(ggobj=gg,
        options = list(opts_tooltip(use_stroke = TRUE, opacity=0.7),
@@ -266,26 +287,30 @@ girafe(ggobj=gg,
 ```{r, eval=TRUE, echo=FALSE, fig.height=8, fig.width=8, layout="l-page"}
 
 country_counter <- 0
-for (country in unique(high_incidence_countries$country_region)) {
+for (country in unique(high_incidence_changes$country_region)) {
   if (country %in% c("Bahrain", "Cruise Ship", "Iran",
                      "Lebanon", "China") |
       !country %in% c(highlight_countries, "US", "Germany", "Spain")) next
 
   country_counter <- country_counter + 1
   
-  incidence_data <- high_incidence_countries %>%
-    ungroup() %>%
-    filter(country_region == country) %>%
-    filter(Date >= ChangeDate) %>%
-    mutate(I = incident_cases) %>%
-    rename(dates=Date) %>%
+  incidence_data <- high_incidence_changes %>%
+    mutate(change_date_obj = case_when(
+      normalised_date >= change_date ~ date
+    )) %>% 
+    # filter(country_region == country) %>%
+    filter(country_region == "Australia") %>%
+    # filter(date >= change_date) %>%
+    filter(date >= change_date_obj) %>%
+    mutate(I = cases) %>%
+    rename(dates = date) %>%
     select(dates, I)
 
   
   res_parametric_si <- estimate_R(incidence_data,
-                                   method = "parametric_si", 
-                                   config = make_config(list(mean_si = 5.0, 
-                                                              std_si = 3.0)))
+                                  method = "parametric_si", 
+                                  config = make_config(list(mean_si = 5.0, 
+                                                            std_si = 3.0)))
                                   
                                   # method="uncertain_si",
                                   # config = make_config(list(
