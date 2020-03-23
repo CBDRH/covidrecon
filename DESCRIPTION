@@ -29,7 +29,11 @@ Imports:
     countrycode,
     janitor,
     stats,
-    scales
+    scales,
+    readxl,
+    httr,
+    glue,
+    purrr
 Suggests: 
     knitr,
     rmarkdown,

@@ -13,3 +13,13 @@ add_continent <- function(x){
     )
   )
 }
+
+glue_date <- function(date){
+  glue::glue("https://www.ecdc.europa.eu/sites/default/files/documents/COVID-19-geographic-disbtribution-worldwide-{date}.xlsx")
+}
+
+discard_null <- function(x) purrr::discard(x, is.null)
+
+pluck_result <- function(x) purrr::pluck(x, "result")
+
+inherits_data_frames <- function(x) purrr::map_lgl(x, inherits, "data.frame")

@@ -1,15 +1,14 @@
-#these libraries are necessary
-library(readxl)
-library(httr)
-library(glue)
-library(lubridate)
-#create the URL where the dataset is stored with automatic updates every day
-
-glue_date <- function(date){
-  glue::glue("https://www.ecdc.europa.eu/sites/default/files/documents/COVID-19-geographic-disbtribution-worldwide-{date}.xlsx")
-}
-
-#download the dataset from the website to a local temporary file
+#' Download raw COVID19 data from European CDC
+#'
+#' This function will download raw COVID19 data, given a date.
+#'   It will error if you enter a date that is later than the current date
+#'   on the CDC site. See `latest_covid()` for a function that handles
+#'   the full details of this.
+#'
+#' @param date in format "YYYY-MM-DD". So, "2020-01-01" is 1st Jan, 2020
+#'
+#' @return data.frame
+#' @export
 covid_pull_ecdc <- function(date){
   url <- glue_date(date)
   httr::GET(url = url,
@@ -18,16 +17,18 @@ covid_pull_ecdc <- function(date){
   readxl::read_excel(tf)
 }
 
-safe_covid_pull_ecdc <- purrr::safely(covid_pull_ecdc)
-
-discard_null <- function(x) purrr::discard(x, is.null)
-pluck_result <- function(x) purrr::pluck(x, "result")
-
+#' Downloads both yesterday and today's COVID19 data
+#'
+#' Assuming CET time zones. For use within `latest_covid()`.
+#'
+#' @return list of yesterdays and today's COVID19 data
+#' @export
 try_covid_yesterday_today <- function(){
 
-  todays_date <- format(lubridate::today(), "%Y-%m-%d")
-  yesterday <- format(lubridate::today() - 1L, "%Y-%m-%d")
+  todays_date <- format(lubridate::today(tz = "CET"), "%Y-%m-%d")
+  yesterday <- format(lubridate::today(tz = "CET") - 2L, "%Y-%m-%d")
 
+  safe_covid_pull_ecdc <- purrr::safely(covid_pull_ecdc)
   purrr::flatten(
     list(
       today = discard_null(safe_covid_pull_ecdc(todays_date)),
@@ -36,16 +37,37 @@ try_covid_yesterday_today <- function(){
   )
 }
 
+#' Pull latest covid19 data from European CDC
+#'
+#' This pull data from \url{https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide}
+#'
+#' @return data.frame
+#' @export
 latest_covid <- function(){
-  data <- pluck_result(try_covid_yesterday_today())
+
+  data <- try_covid_yesterday_today()
+
+  # if we have data for both, take the latest date
+  if ( all(inherits_data_frames(data)) ) {
+
+    covid_latest_dates <- c(max(data[[1]]$DateRep),
+                            max(data[[2]]$DateRep))
+
+    which_is_latest <- which.max(covid_latest_dates)
+
+    latest_data <- data[[which_is_latest]]
+
+    # else, only the "result" has a data.frame
+  } else {
+    latest_data <- pluck_result(data)
+  }
 
   message("covid data extracted from ",
-          min(data$DateRep), " UTC",
+          min(latest_data$DateRep), " UTC",
           " to ",
-          max(data$DateRep), " UTC")
+          max(latest_data$DateRep), " UTC")
 
-  data
+  return(latest_data)
 }
 
-covid_data <- latest_covid()
 
