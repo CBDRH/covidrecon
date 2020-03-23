@@ -14,7 +14,7 @@ covid_pull_ecdc <- function(date){
   httr::GET(url = url,
       config = httr::authenticate(":", ":", type="ntlm"),
       httr::write_disk(tf <- tempfile(fileext = ".xlsx")))
-  readxl::read_excel(tf)
+  readxl::read_excel(tf, .name_repair = janitor::make_clean_names)
 }
 
 #' Downloads both yesterday and today's COVID19 data
@@ -50,8 +50,8 @@ latest_covid <- function(){
   # if we have data for both, take the latest date
   if ( all(inherits_data_frames(data)) ) {
 
-    covid_latest_dates <- c(max(data[[1]]$DateRep),
-                            max(data[[2]]$DateRep))
+    covid_latest_dates <- c(max(data[[1]]$date_rep),
+                            max(data[[2]]$date_rep))
 
     which_is_latest <- which.max(covid_latest_dates)
 
@@ -63,13 +63,11 @@ latest_covid <- function(){
   }
 
   message("covid data extracted from ",
-          min(latest_data$DateRep), " UTC",
+          min(latest_data$date_rep), " UTC",
           " to ",
-          max(latest_data$DateRep), " UTC")
+          max(latest_data$date_rep), " UTC")
 
-  tidy_covid <- tibble::as_tibble(latest_data,
-                                  .name_repair = janitor::make_clean_names)
-  return(tidy_covid)
+  return(latest_data)
 }
 
 
