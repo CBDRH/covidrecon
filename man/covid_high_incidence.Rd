@@ -2,7 +2,7 @@
 % Please edit documentation in R/high-incidence.R
 \name{covid_high_incidence}
 \alias{covid_high_incidence}
-\title{get the covid_high_incidence data}
+\title{Return only countries that have more than 100 cases}
 \usage{
 covid_high_incidence(covid_data)
 }
@@ -13,5 +13,5 @@ covid_high_incidence(covid_data)
 high incidence data
 }
 \description{
-get the covid_high_incidence data
+Return only countries that have more than 100 cases
 }

@@ -74,7 +74,18 @@ covid_latest <- function(){
     dplyr::arrange(date) %>%
     dplyr::group_by(country_region) %>%
     dplyr::mutate(cumulative_cases = cumsum(cases)) %>%
-    dplyr::ungroup()
+    dplyr::ungroup() %>%
+    dplyr::select(date,
+                  country_region,
+                  deaths,
+                  cases,
+                  cumulative_cases,
+                  year,
+                  month,
+                  day,
+                  dplyr::everything()) %>%
+    dplyr::arrange(country_region, date)
+
 
   return(tidy_covid)
 }
