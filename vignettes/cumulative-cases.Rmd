@@ -149,6 +149,11 @@ gg
 
 # Tim's plots
 
+```{r}
+high_incidence_countries %>% 
+  filter(country_region == "Australia")
+```
+
 
 ```{r}
 covid <- covid_latest() 
@@ -162,8 +167,6 @@ highlight_countries <- c("Japan", "South Korea",
                           "Iran", "China", "France",
                           "UK",
                           "Sweden", "Australia")
-
-  add_country_label()
 
 high_incidence_countries <- high_incidence_countries %>%
   left_join(high_incidence_countries %>% 
@@ -189,19 +192,27 @@ high_incidence_countries <- high_incidence_countries %>%
 ```
 
 ```{r}
+high_incidence_countries %>% 
+  filter(country_region == "Australia")
+```
+
+
+```{r}
 library(changepoint)
 
 change_dates <- tibble(country_region = character(0),
                        ChangeDate = lubridate::ymd())
 
 extract_change_point_mean_var <- function(data){
-  cpt.meanvar(data$cases, class = FALSE)["cpt"]
+  changepoint::cpt.meanvar(data$cases, class = FALSE)["cpt"]
 }
 
-high_incidence_changes <-
-    high_incidence_countries %>%
-    group_by(country_region) %>%
-    mutate(n_obs = vctrs::vec_size(country_region)) %>% 
+# high_incidence_change_date <-
+# hi_aus <- 
+  high_incidence_countries %>%
+    # group_by(country_region) %>%
+  filter(country_region == "Australia") %>%
+  mutate(n_obs = vctrs::vec_size(country_region)) %>% 
     # remove countries with only 4 observations
     filter(n_obs > 4) %>% 
     ungroup() %>% 

@@ -1,0 +1,320 @@
+---
+title: "COVID-19 trends and trajectories"
+author:
+  - name: Tim Churches 
+    affiliation: South Western Sydney Clinical School, UNSW Medicine & Ingham Institute of Applied Medical Research, Liverpool, Sydney, Australia
+    affiliation_url: https://swscs.med.unsw.edu.au
+  - name: Nick Tierney 
+    affiliation: Monash University
+    affiliation_url: 
+date: 03-20-2020
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    self_contained: true
+---
+
+```{r setup, include=FALSE}
+version <- "1.8"
+version_date <- lubridate::ymd("2020-02-28")
+
+knitr::opts_chunk$set(echo = FALSE, cache=FALSE,
+                      tidy.opts=list(width.cutoff=60),
+                      tidy=TRUE)
+
+library(tidyverse)
+library(magrittr)
+library(lubridate)
+library(tibble)
+library(ggplot2)
+library(ggthemes)
+library(hrbrthemes)
+library(rvest)
+library(gt)
+library(deSolve)
+library(EpiEstim)
+library(incidence)
+library(distcrete)
+library(epitrix)
+library(projections)
+library(ggiraph)
+library(ggrepel)
+```
+
+```{r}
+  provinces_confirmed_jh <- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv") %>%
+    rename(province="Province/State",
+           country_region="Country/Region") %>%
+    pivot_longer(-c(province, country_region, Lat, Long), 
+                 names_to = "Date",
+                 values_to="cumulative_cases") %>%
+    mutate(Date=mdy(Date)) %>%
+    mutate(country_region = case_when(country_region == "Korea, South" ~ "South Korea",
+                                      country_region == "United Kingdom" ~ "UK",
+                                      TRUE ~ country_region)) %>%
+    arrange(country_region, province, Date) %>%
+    group_by(country_region, province) %>%
+    mutate(incident_cases = c(0,diff(cumulative_cases))) %>%
+    ungroup()
+
+  incidence_countries <- provinces_confirmed_jh %>%
+    group_by(country_region, Date) %>%
+    summarise(incident_cases = sum(incident_cases),
+              cumulative_cases = sum(cumulative_cases))
+ 
+    incidence_global <- provinces_confirmed_jh %>%
+    group_by(Date) %>%
+    summarise(incident_cases = sum(incident_cases),
+              cumulative_cases = sum(cumulative_cases))
+ 
+```
+
+```{r}
+# find dates on which 100 cumulative cases occurred
+high_incidence_countries <- incidence_countries %>%
+  arrange(country_region, Date) %>%
+  mutate(lag_cum_cases = lag(cumulative_cases)) %>%
+  mutate(hit_100 = ifelse((cumulative_cases >= 100) & 
+                          (lag(cumulative_cases) < 100),
+                          TRUE,
+                          FALSE)) %>%
+  mutate(hit_100 = ifelse(country_region == "China" & Date == min(Date),
+                          TRUE,
+                          hit_100))
+
+high_incidence_countries <- high_incidence_countries %>% 
+    left_join(high_incidence_countries %>% 
+      group_by(country_region) %>%
+      summarise(over_100 = any(hit_100))) %>%
+  ungroup() %>%
+  filter(over_100 == TRUE)
+
+high_incidence_countries <- high_incidence_countries %>%
+  arrange(country_region, Date) %>%
+  group_by(country_region) %>%
+  mutate(rnum = row_number()) %>%
+  ungroup()
+
+highlight_countries <- c("Japan", "South Korea",
+                          "Singapore", "Italy",
+                          "Iran", "China", "France",
+                          "UK",
+                          "Sweden", "Australia")
+
+high_incidence_countries <- high_incidence_countries %>%
+  left_join(high_incidence_countries %>% 
+              filter(hit_100) %>%
+              mutate(offset = rnum) %>%
+              select(country_region, offset)) %>%
+  mutate(normalised_date = rnum - offset) %>%
+  select(-c(lag_cum_cases, over_100, offset)) %>%
+  mutate(alpha = case_when(country_region == "Australia" ~ 1.0,
+                           country_region %in% highlight_countries ~ 0.2,
+                           TRUE ~ 0)) %>%
+  arrange(country_region, normalised_date) %>%
+  group_by(country_region) %>%
+  mutate(clabel_value = ifelse(country_region %in% highlight_countries,
+                         country_region,
+                         NA),
+         clabel_x = max(normalised_date),
+         clabel_y = last(cumulative_cases)) %>%
+  mutate(incident_cases = case_when(country_region == "Japan" &
+                                      Date == ymd("2020-01-23") ~ 0,
+                                    country_region == "Japan" &
+                                      Date == ymd("2020-02-06") ~ 3,
+                                    country_region == "Japan" &
+                                      Date == ymd("2020-02-07") ~ 0,
+                                    country_region == "Japan" &
+                                      Date == ymd("2020-03-15") ~ 52,
+                                    country_region == "Japan" &
+                                      Date == ymd("2020-03-16") ~ 0,
+                                    TRUE ~ incident_cases))
+
+```
+
+```{r}
+library(changepoint)
+
+change_dates <- tibble(country_region = character(0),
+                       ChangeDate = lubridate::ymd())
+
+for (country in unique(high_incidence_countries$country_region)) {
+  ts <- high_incidence_countries %>%
+  filter(country_region == country) %>%
+  pull(incident_cases)
+
+ cpt <- cpt.meanvar(ts,class=FALSE)["cpt"]
+ 
+  changedate <- high_incidence_countries %>%
+     filter(country_region == country) %>%
+     slice(cpt) %>%
+     select(country_region, Date) %>%
+     rename(ChangeDate = Date)
+
+  change_dates <- change_dates %>%
+    bind_rows(changedate)
+}
+
+high_incidence_countries <- high_incidence_countries %>% 
+  left_join(change_dates)
+
+```
+
+```{r, fig.width=8, fig,height=16}
+high_incidence_countries %>% 
+  filter(country_region %in% c(highlight_countries, "US", "Germany", "Denmark")) %>%
+  left_join(change_dates) %>%
+  ggplot(aes(x=Date, y=incident_cases)) +
+    geom_line() +
+    geom_vline(aes(xintercept=ChangeDate)) +
+    facet_grid(country_region~., scales="free_y")
+```
+
+## The "Grattan Institute" plot
+
+```{r, layout="l-page"}
+gg <- high_incidence_countries %>%
+  filter(normalised_date >= 0,
+         country_region != "Cruise Ship") %>%
+  ggplot(aes(x=normalised_date, y=cumulative_cases, 
+             colour=country_region, alpha=alpha, 
+             tooltip=country_region,
+             data_id=country_region)) +
+  geom_line_interactive(size=1.2) + 
+  geom_label(aes(x=clabel_x, y=clabel_y, label=clabel_value),
+             hjust = 0, nudge_x = 0.2) +
+  scale_y_log10(labels=scales::comma) +
+  scale_alpha(range=c(0.2, 1)) +
+  expand_limits(x=c(0, max(high_incidence_countries$normalised_date) + 5)) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  labs(y="Cumulative cases (logarithmic scale)",
+       x="Days since cumulative cases exceeded 100",
+       title=paste("COVID-19 epidemic trajectories up to", format(max(high_incidence_countries$Date), "%d %B %Y")),
+       subtitle="(click on a line to identify country)",
+       caption=paste0("CC BY-NC-SA Tim Churches (UNSW)\n",
+                "Data source: Johns Hopkins University"))
+
+girafe(ggobj=gg,
+       options = list(opts_tooltip(use_stroke = TRUE, opacity=0.7),
+                      opts_hover(css = "stroke:black;"),
+                      opts_toolbar(position = "topright", saveaspng = TRUE)
+                      ))
+```
+
+## Instantaneous effective reproduction number
+
+```{r, eval=TRUE, echo=FALSE, fig.height=8, fig.width=8, layout="l-page"}
+
+country_counter <- 0
+for (country in unique(high_incidence_countries$country_region)) {
+  
+  country = "Australia"
+  if (country %in% c("Bahrain", "Cruise Ship", "Iran",
+                     "Lebanon", "China") |
+      !country %in% c(highlight_countries, "US", "Germany", "Spain")) next
+
+  country_counter <- country_counter + 1
+  
+  incidence_data <- high_incidence_countries %>%
+    ungroup() %>%
+    filter(country_region == country) %>%
+    filter(Date >= ChangeDate) %>%
+    mutate(I = incident_cases) %>%
+    rename(dates=Date) %>%
+    select(dates, I)
+
+  
+  res_parametric_si <- estimate_R(incidence_data,
+                                   method = "parametric_si", 
+                                   config = make_config(list(mean_si = 5.0, 
+                                                              std_si = 3.0)))
+                                  
+                                  # method="uncertain_si",
+                                  # config = make_config(list(
+                                  # mean_si = 4.8, std_mean_si = 3.0,
+                                  # min_mean_si = 2, max_mean_si = 7.5,
+                                  # std_si = 3.0, std_std_si = 1.0,
+                                  # min_std_si = 0.5, max_std_si = 4.0,
+                                  # n1 = 1000, n2 = 1000)))
+                                  # 
+  R_df <-  res_parametric_si$R
+  R_df <- R_df %>% 
+    mutate(country = country)
+  R_df$Date <- res_parametric_si$dates[8:length(res_parametric_si$dates)]
+  if (country_counter == 1) {
+    country_eff_Rs <- R_df
+  } else {
+    country_eff_Rs <- country_eff_Rs %>%
+      bind_rows(R_df)
+  }
+}
+
+
+start_dates <- high_incidence_countries %>%
+  filter(hit_100 == TRUE) %>%
+  rename(country=country_region,
+         start_date=Date) %>%
+  select(country, start_date)
+
+country_eff_Rs <- country_eff_Rs %>%
+  left_join(start_dates) %>%
+  filter(Date >= start_date) %>%
+  rename(mean_R="Mean(R)")
+
+label_country_eff_Rs <- country_eff_Rs %>%
+  arrange(country, Date) %>%
+  group_by(country) %>%
+  summarise(clabel_x = max(Date),
+            clabel_y = last(mean_R)) %>%
+  ungroup()
+  
+```
+
+```{r, fig.height=8, fig.width=8, layout="l-page"}
+country_eff_Rs %>%
+  ggplot(aes(x=Date, y=mean_R, colour=country)) +
+  geom_line(size=1.5) +
+  geom_hline(yintercept = 1.0, colour="red") +
+  facet_wrap(~country, ncol = 2) +
+  scale_y_log10() +
+  scale_x_date(date_breaks = "1 week",
+               date_labels = "%d %b") +
+  labs(title=paste("7-day sliding window of effective reproduction number up to",
+                   format(max(country_eff_Rs$Date), "%d %B %Y")),
+       subtitle="Outbreak is under control if effective R is under red line",
+       x = "End date of 7-day sliding window",
+       y="Effective R (log scale)",
+       caption=paste0("CC BY-NC-SA Tim Churches (UNSW)\n",
+                      "Data source: Johns Hopkins University")) +
+  theme_dark() + 
+  theme(legend.position = "none") 
+
+```
+
+```{r, fig.height=8, fig.width=8, layout="l-page"}
+country_eff_Rs %>%
+  ggplot(aes(x=Date, y=mean_R, colour=country)) +
+  geom_line(size=1.5) +
+  geom_hline(yintercept = 1.0, colour="red") +
+  geom_label_repel(data=label_country_eff_Rs,
+                   aes(x=clabel_x, y=clabel_y, label=country),
+             hjust = 0, nudge_x = 0.2, xlim=c(max(country_eff_Rs$Date) + days(1),
+                                              max(country_eff_Rs$Date) + days(5))) +
+  scale_y_log10() +
+  scale_x_date(date_breaks = "1 week",
+               date_labels = "%d %b",
+               expand = expansion(add=c(0,5))) +
+  scale_colour_viridis_d() +
+  labs(title=paste("7-day sliding window of effective reproduction number up to",
+                   format(max(country_eff_Rs$Date), "%d %B %Y")),
+       subtitle="Outbreak is under control if effective R is under red line",
+       x = "End date of 7-day sliding window",
+       y="Effective R (log scale)",
+       caption=paste0("CC BY-NC-SA Tim Churches (UNSW)\n",
+                      "Data source: Johns Hopkins University")) +
+  theme_dark() + 
+  theme(legend.position = "none") 
+
+```
