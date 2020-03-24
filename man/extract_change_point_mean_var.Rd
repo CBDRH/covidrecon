@@ -2,16 +2,16 @@
 % Please edit documentation in R/changepoint.R
 \name{extract_change_point_mean_var}
 \alias{extract_change_point_mean_var}
-\title{Title}
+\title{Extract changepoint}
 \usage{
-extract_change_point_mean_var(data)
+extract_change_point_mean_var(data, ...)
 }
 \arguments{
-\item{data}{}
+\item{...}{params to pass to \code{changepoint::cpt.meanvar}}
 }
 \value{
 
 }
 \description{
-Title
+Extract changepoint
 }

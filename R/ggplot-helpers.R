@@ -2,19 +2,58 @@
 #'
 #' @param covid_data - covid19 data.frame
 #'
-#' @return ggplot
+#' @return ggplot plot
+#' @import ggplot2
 #' @export
-gg_covid_cumulative <- function(covid_data){
-  covid_data %>%
-    ggplot2::ggplot(ggplot2::aes(x = normalised_date,
-                                 y = cumulative_cases,
-                                 colour = country_region)) +
-    ggplot2::geom_line() +
-    ggplot2::scale_y_log10() +
-    ggplot2::theme(legend.position = "none") +
-    ggplot2::labs(x = "Days since cumulative cases exceeded 100",
-                  y = "Cumulative Cases",
-                  title = "Cumulative cases of COVID19")
+gg_covid_cumulative_exceed_100 <- function(covid_data){
+
+  covid_data_last <- covid_data %>%
+    group_by(country_region) %>%
+    filter(date == last(date))
+
+  ggplot(data = covid_date_normalised,
+         aes(x = date_since_100_cases,
+             y = cumulative_cases,
+             colour = country_region)) +
+    geom_line() +
+    scale_y_log10(labels = scales::comma) +
+    scale_x_continuous(expand = expansion(mult = c(0, 0.1))) +
+    theme_minimal() +
+    labs(y = "Cumulative cases (logarithmic scale)",
+         x = "Days since cumulative cases exceeded 100",
+         title = create_title_date(covid_data)) +
+    ggrepel::geom_label_repel(data = covid_data_last,
+                              aes(label = country_region),
+                              nudge_x = 15) +
+    theme(legend.position = "none")
+}
+
+
+#' misc-ggplot funs for covid19
+#'
+#' @param covid_data covid19 data
+#'
+#' @return ggplot image
+#' @export
+#' @rdname gg-covid
+gg_covid_cases <- function(covid_data){
+  ggplot(data = covid_data,
+         aes(x = date,
+             y = cases,
+             group = country_region)) +
+    geom_line() +
+    scale_y_log10()
+}
+
+#' @export
+#' @name gg-covid
+gg_covid_cumulative_cases <- function(covid_data){
+  ggplot(data = covid_data,
+         aes(x = date,
+             y = cumulative_cases,
+             group = country_region)) +
+    geom_line() +
+    scale_y_log10()
 }
 
 #' Add a country label for plotting

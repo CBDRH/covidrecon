@@ -23,3 +23,8 @@ discard_null <- function(x) purrr::discard(x, is.null)
 pluck_result <- function(x) purrr::pluck(x, "result")
 
 inherits_data_frames <- function(x) purrr::map_lgl(x, inherits, "data.frame")
+
+create_title_date <- function(covid_data){
+  date <- format(max(covid_data$date), "%d %B %Y")
+  glue::glue("COVID-19 epidemic trajectories up to {date}")
+}
