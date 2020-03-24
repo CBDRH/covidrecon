@@ -12,7 +12,7 @@ globalVariables(
     "over_100",
     "province",
     "province_state",
-    "rnum",
+    "n_days",
     "summarise",
     "clabel_value",
     "clabel_x",

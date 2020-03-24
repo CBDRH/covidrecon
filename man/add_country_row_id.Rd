@@ -10,7 +10,7 @@ add_country_row_id(covid_data)
 \item{covid_data}{covid19 data}
 }
 \value{
-adds row ID column, \code{rnum}, for each country
+adds row ID column, \code{n_days}, for each country
 }
 \description{
 Add row ID for each country from start date

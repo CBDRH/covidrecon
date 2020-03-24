@@ -14,15 +14,14 @@ covid_high_incidence <- function(covid_data) {
     dplyr::filter(hit_100) %>%
     dplyr::select(country_region,
                   # the number of days since it started at 100
-                  day_start_100 = rnum)
+                  day_start_100 = n_days)
 
   dplyr::left_join(x = high_incidence_countries,
                    y = days_start_100,
                    by = "country_region") %>%
-    dplyr::mutate(date_since_100_cases = rnum - day_start_100) %>%
+    dplyr::mutate(date_since_100_cases = n_days - day_start_100) %>%
     dplyr::select(-over_100,
                   -day_start_100,
-                  -rnum,
                   -hit_100)
 
 }
