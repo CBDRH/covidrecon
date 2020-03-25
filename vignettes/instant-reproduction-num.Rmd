@@ -19,6 +19,7 @@ library(covidrecon)
 library(dplyr)
 library(ggplot2)
 library(tidyr)
+library(purrr)
 ```
 
 ```{r}
@@ -67,108 +68,6 @@ covid_highlighted <- covid_changepoint %>%
 
 ## Instantaneous effective reproduction number
 
-```{r, eval=TRUE, echo=FALSE, fig.height=8, fig.width=8, layout="l-page"}
-  
-covid_prepare_estimate_repro <- function(covid_data_changepoint){
-  covid_data_changepoint %>%
-    ungroup() %>% 
-  # EpiEstim::estimate_R requires a specific format of data
-    mutate(date = as.Date(date)) %>% 
-    select(dates = date,
-           I = cases)
-}
-
-covid_estimate_repro <- function(covid_data_prepared,
-                                 estimate_method = "parametric_si"){
-  EpiEstim::estimate_R(covid_data_prepared,
-                       method = estimate_method,
-                       # method="uncertain_si",
-                       config = EpiEstim::make_config(list(mean_si = 5.0,
-                                                           std_si = 3.0)))
-                                  # config = make_config(list(
-                                  # mean_si = 4.8, 
-                                  # std_mean_si = 3.0,
-                                  # min_mean_si = 2, 
-                                  # max_mean_si = 7.5,
-                                  # std_si = 3.0, 
-                                  # std_std_si = 1.0,
-                                  # min_std_si = 0.5, 
-                                  # max_std_si = 4.0,
-                                  # n1 = 1000, 
-                                  # n2 = 1000)))
-}
-
-tidy_repro_estimate <- function(covid_estimated_reproduction){
-  
-  df_reproduction <- covid_estimated_reproduction$R
-  
-  date_range <- 8:length(covid_estimated_reproduction$dates)
-  
-  df_reproduction$date <- covid_estimated_reproduction$dates[date_range]
-  
-  tibble::as_tibble(df_reproduction,
-                    .name_repair = janitor::make_clean_names)
-}
-library(purrr)
-
-tidy_incidence_data <- 
-  covid_changepoint %>% 
-  filter(date >= change_point_date) %>% 
-  group_by(country_region) %>%
-  nest() %>% 
-  mutate(prepared_data = purrr::map(data, covid_prepare_estimate_repro),
-         repro_estimate = purrr::map(prepared_data,
-                                     purrr::safely(covid_estimate_repro)),
-         repro_result = purrr::map(repro_estimate, pluck, "result"),
-         result = purrr::map(repro_result, tidy_repro_estimate))
-
-tidy_incidence_data %>% 
-  select(country_region,
-         result) %>% 
-  unnest(cols = c(result))  %>% 
-    select(country_region, date, everything())
-
-tidy_incidence_data %>% 
-  select(country_region,
-         result) %>% 
-  mutate(no_result = map_lgl(result, function(x) nrow(x) == 0)) %>% 
-  filter(no_result) %>% 
-  select(country_region, no_result)
-```
-
-```{r}
-estimate_repro_all <- function(covid_data){
-  covid_data %>% 
-  group_by(country_region) %>%
-  nest() %>% 
-  mutate(prepared_data = purrr::map(data, covid_prepare_estimate_repro),
-         repro_estimate = purrr::map(prepared_data,
-                                     purrr::safely(covid_estimate_repro)),
-         repro_result = purrr::map(repro_estimate, pluck, "result"),
-         result = purrr::map(repro_result, tidy_repro_estimate))
-}
-
-augment_estimate_repro <- function(covid_data_estimated){
-  covid_data_estimated %>% 
-    select(country_region,
-           result) %>% 
-  unnest(cols = c(result))  %>% 
-    select(country_region, date, everything()) %>% 
-    ungroup()
-}
-
-estimate_repro_errors <- function(covid_data_estimated){
-  covid_data_estimated %>% 
-  select(country_region,
-         result) %>% 
-  mutate(no_result = map_lgl(result, function(x) nrow(x) == 0)) %>% 
-  filter(no_result) %>% 
-  select(country_region, no_result)
-
-}
-
-```
-
 ```{r}
 covid_estimated_repro <- covid_changepoint %>% 
   filter(date >= change_point_date) %>% 
@@ -176,17 +75,14 @@ covid_estimated_repro <- covid_changepoint %>%
 
 covid_tidy_repro <- augment_estimate_repro(covid_estimated_repro)
 
-covid_repro_countries_not_measured <- estimate_repro_errors(covid_estimated_repro)
-
-covid_repro_countries_not_measured
-
 covid_tidy_repro
 ```
 
 ```{r}
-countries_repro_error <- estimate_repro_errors(covid_estimated_repro)$country_region
+countries_errors <- country_repro_errors(covid_estimated_repro)
+
 covid_estimated_repro %>% 
-  filter(country_region %in% countries_repro_error) %>% 
+  filter(country_region %in% countries_errors) %>% 
   select(country_region,
          repro_estimate) %>% 
   unnest(cols = c(repro_estimate)) %>% 
