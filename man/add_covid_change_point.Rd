@@ -7,6 +7,8 @@
 add_covid_change_point(covid_data, ...)
 }
 \arguments{
+\item{covid_data}{data.frame}
+
 \item{...}{params to pass to \code{changepoint::cpt.meanvar}}
 }
 \value{

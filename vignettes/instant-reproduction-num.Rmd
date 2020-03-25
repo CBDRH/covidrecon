@@ -30,6 +30,18 @@ covid_changepoint <- add_covid_change_point(covid_high_incidence)
 
 ```
 
+# explore china data
+
+```{r}
+covid_china <- covid %>% 
+  filter(country_region == "China")
+
+ggplot(covid_china,
+       aes(x = date,
+           y = cumulative_cases)) + 
+  geom_line()
+```
+
 
 ```{r highlight-countries}
 highlight_countries <- c("Japan",
@@ -56,53 +68,134 @@ covid_highlighted <- covid_changepoint %>%
 ## Instantaneous effective reproduction number
 
 ```{r, eval=TRUE, echo=FALSE, fig.height=8, fig.width=8, layout="l-page"}
-country_counter <- 0
-for (country in unique(covid_changepoint$country_region)) {
-  if (country %in% c("Bahrain", "Cruise Ship", "Iran",
-                     "Lebanon", "China") |
-      !country %in% c(highlight_countries, "US", "Germany", "Spain")) next
-
-  country_counter <- country_counter + 1
   
-  incidence_data <- high_incidence_changes %>%
-    mutate(change_date_obj = case_when(
-      normalised_date >= change_date ~ date
-    )) %>% 
-    # filter(country_region == country) %>%
-    filter(country_region == "Australia") %>%
-    # filter(date >= change_date) %>%
-    filter(date >= change_date_obj) %>%
-    mutate(I = cases) %>%
-    rename(dates = date) %>%
-    select(dates, I)
-
-  
-  res_parametric_si <- estimate_R(incidence_data,
-                                  method = "parametric_si", 
-                                  config = make_config(list(mean_si = 5.0, 
-                                                            std_si = 3.0)))
-                                  
-                                  # method="uncertain_si",
-                                  # config = make_config(list(
-                                  # mean_si = 4.8, std_mean_si = 3.0,
-                                  # min_mean_si = 2, max_mean_si = 7.5,
-                                  # std_si = 3.0, std_std_si = 1.0,
-                                  # min_std_si = 0.5, max_std_si = 4.0,
-                                  # n1 = 1000, n2 = 1000)))
-                                  # 
-  R_df <-  res_parametric_si$R
-  R_df <- R_df %>% 
-    mutate(country = country)
-  R_df$Date <- res_parametric_si$dates[8:length(res_parametric_si$dates)]
-  if (country_counter == 1) {
-    country_eff_Rs <- R_df
-  } else {
-    country_eff_Rs <- country_eff_Rs %>%
-      bind_rows(R_df)
-  }
+covid_prepare_estimate_repro <- function(covid_data_changepoint){
+  covid_data_changepoint %>%
+    ungroup() %>% 
+  # EpiEstim::estimate_R requires a specific format of data
+    mutate(date = as.Date(date)) %>% 
+    select(dates = date,
+           I = cases)
 }
 
+covid_estimate_repro <- function(covid_data_prepared,
+                                 estimate_method = "parametric_si"){
+  EpiEstim::estimate_R(covid_data_prepared,
+                       method = estimate_method,
+                       # method="uncertain_si",
+                       config = EpiEstim::make_config(list(mean_si = 5.0,
+                                                           std_si = 3.0)))
+                                  # config = make_config(list(
+                                  # mean_si = 4.8, 
+                                  # std_mean_si = 3.0,
+                                  # min_mean_si = 2, 
+                                  # max_mean_si = 7.5,
+                                  # std_si = 3.0, 
+                                  # std_std_si = 1.0,
+                                  # min_std_si = 0.5, 
+                                  # max_std_si = 4.0,
+                                  # n1 = 1000, 
+                                  # n2 = 1000)))
+}
 
+tidy_repro_estimate <- function(covid_estimated_reproduction){
+  
+  df_reproduction <- covid_estimated_reproduction$R
+  
+  date_range <- 8:length(covid_estimated_reproduction$dates)
+  
+  df_reproduction$date <- covid_estimated_reproduction$dates[date_range]
+  
+  tibble::as_tibble(df_reproduction,
+                    .name_repair = janitor::make_clean_names)
+}
+library(purrr)
+
+tidy_incidence_data <- 
+  covid_changepoint %>% 
+  filter(date >= change_point_date) %>% 
+  group_by(country_region) %>%
+  nest() %>% 
+  mutate(prepared_data = purrr::map(data, covid_prepare_estimate_repro),
+         repro_estimate = purrr::map(prepared_data,
+                                     purrr::safely(covid_estimate_repro)),
+         repro_result = purrr::map(repro_estimate, pluck, "result"),
+         result = purrr::map(repro_result, tidy_repro_estimate))
+
+tidy_incidence_data %>% 
+  select(country_region,
+         result) %>% 
+  unnest(cols = c(result))  %>% 
+    select(country_region, date, everything())
+
+tidy_incidence_data %>% 
+  select(country_region,
+         result) %>% 
+  mutate(no_result = map_lgl(result, function(x) nrow(x) == 0)) %>% 
+  filter(no_result) %>% 
+  select(country_region, no_result)
+```
+
+```{r}
+estimate_repro_all <- function(covid_data){
+  covid_data %>% 
+  group_by(country_region) %>%
+  nest() %>% 
+  mutate(prepared_data = purrr::map(data, covid_prepare_estimate_repro),
+         repro_estimate = purrr::map(prepared_data,
+                                     purrr::safely(covid_estimate_repro)),
+         repro_result = purrr::map(repro_estimate, pluck, "result"),
+         result = purrr::map(repro_result, tidy_repro_estimate))
+}
+
+augment_estimate_repro <- function(covid_data_estimated){
+  covid_data_estimated %>% 
+    select(country_region,
+           result) %>% 
+  unnest(cols = c(result))  %>% 
+    select(country_region, date, everything()) %>% 
+    ungroup()
+}
+
+estimate_repro_errors <- function(covid_data_estimated){
+  covid_data_estimated %>% 
+  select(country_region,
+         result) %>% 
+  mutate(no_result = map_lgl(result, function(x) nrow(x) == 0)) %>% 
+  filter(no_result) %>% 
+  select(country_region, no_result)
+
+}
+
+```
+
+```{r}
+covid_estimated_repro <- covid_changepoint %>% 
+  filter(date >= change_point_date) %>% 
+  estimate_repro_all()
+
+covid_tidy_repro <- augment_estimate_repro(covid_estimated_repro)
+
+covid_repro_countries_not_measured <- estimate_repro_errors(covid_estimated_repro)
+
+covid_repro_countries_not_measured
+
+covid_tidy_repro
+```
+
+```{r}
+countries_repro_error <- estimate_repro_errors(covid_estimated_repro)$country_region
+covid_estimated_repro %>% 
+  filter(country_region %in% countries_repro_error) %>% 
+  select(country_region,
+         repro_estimate) %>% 
+  unnest(cols = c(repro_estimate)) %>% 
+  slice(2) %>% 
+  pull(repro_estimate) 
+```
+
+
+```{r, eval=TRUE, echo=FALSE, fig.height=8, fig.width=8, layout="l-page"}
 start_dates <- high_incidence_countries %>%
   filter(hit_100 == TRUE) %>%
   rename(country=country_region,

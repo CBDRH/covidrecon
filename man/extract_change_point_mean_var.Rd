@@ -7,6 +7,8 @@
 extract_change_point_mean_var(data, ...)
 }
 \arguments{
+\item{data}{data.frame}
+
 \item{...}{params to pass to \code{changepoint::cpt.meanvar}}
 }
 \value{

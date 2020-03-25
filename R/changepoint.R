@@ -1,6 +1,6 @@
 #' Extract changepoint
 #'
-#' @param data
+#' @param data data.frame
 #' @param ... params to pass to `changepoint::cpt.meanvar`
 #'
 #' @return
@@ -14,7 +14,7 @@ extract_change_point_mean_var <- function(data, ...){
 
 #' Title
 #'
-#' @param covid_data
+#' @param covid_data data.frame
 #' @param ... params to pass to `changepoint::cpt.meanvar`
 #'
 #' @return
@@ -46,7 +46,7 @@ covid_change_point <- function(covid_data, ...){
 
 #' Title
 #'
-#' @param covid_data
+#' @param covid_data data.frame
 #' @param ... params to pass to `changepoint::cpt.meanvar`
 #'
 #' @return
