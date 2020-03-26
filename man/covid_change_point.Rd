@@ -2,12 +2,14 @@
 % Please edit documentation in R/changepoint.R
 \name{covid_change_point}
 \alias{covid_change_point}
-\title{Title}
+\title{Calculate changepoint date using \code{changepoint::cpt.meanvar}}
 \usage{
-covid_change_point(covid_data, ...)
+covid_change_point(covid_data, x = "cases", ...)
 }
 \arguments{
 \item{covid_data}{data.frame}
+
+\item{x}{variable name (as character) of cases. Default is "cases".}
 
 \item{...}{params to pass to \code{changepoint::cpt.meanvar}}
 }
@@ -15,5 +17,5 @@ covid_change_point(covid_data, ...)
 
 }
 \description{
-Title
+Calculate changepoint date using \code{changepoint::cpt.meanvar}
 }

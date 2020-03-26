@@ -4,7 +4,11 @@
 \alias{covid_latest}
 \title{Pull latest covid19 data from European CDC}
 \usage{
-covid_latest()
+covid_latest(patch = TRUE)
+}
+\arguments{
+\item{patch}{logical. Patch China miscounts see \code{\link[=patch_china_data]{patch_china_data()}}.
+Default is TRUE.}
 }
 \value{
 data.frame

@@ -16,21 +16,13 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(covidrecon)
-library(changepoint)
 library(dplyr)
 library(ggplot2)
-
-version <- "1.8"
-version_date <- lubridate::ymd("2020-02-28")
-
-
 ```
 
 ```{r covid}
 covid <- covid_latest()
-
 covid_high_incidence <- covid_high_incidence(covid)
-
 covid_changepoint <- add_covid_change_point(covid_high_incidence)
   
 ```

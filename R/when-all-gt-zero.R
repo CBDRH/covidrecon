@@ -10,6 +10,7 @@
 #' when_all_gt_zero(c(0, 1, 0, 1, 1, 2, 3))
 #' when_all_gt_zero(c(0, 0, 0, 0))
 #' when_all_gt_zero(c(1, 0, 1, 1, 0, 2, 3, 4))
+#' where_all_gt_zero(c(1, 0, 1, 1, 0, 2, 3, 4))
 when_all_gt_zero <- function(x){
 
   purrr::accumulate(x > 0,

@@ -41,31 +41,20 @@ try_ecdc <- function(){
 #'
 #' This pull data from \url{https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide}
 #'
+#' @param patch logical. Patch China miscounts see [patch_china_data()].
+#'   Default is TRUE.
+#'
 #' @return data.frame
 #' @export
-covid_latest <- function(){
+covid_latest <- function(patch = TRUE){
 
   data <- try_ecdc()
 
-  # if we have data for both, take the latest date
-  if ( all(inherits_data_frames(data)) ) {
+  latest_data <- pluck_latest_ecdc(data)
 
-    covid_latest_dates <- c(max(data[[1]]$date_rep),
-                            max(data[[2]]$date_rep))
-
-    which_is_latest <- which.max(covid_latest_dates)
-
-    latest_data <- data[[which_is_latest]]
-
-    # else, only the "result" has a data.frame
-  } else {
-    latest_data <- pluck_result(data)
+  if (patch) {
+    latest_data <- patch_china_data(latest_data)
   }
-
-  message("covid data extracted from ",
-          min(latest_data$date_rep), " UTC",
-          " to ",
-          max(latest_data$date_rep), " UTC")
 
   tidy_covid <- latest_data %>%
     dplyr::rename(date = date_rep,
@@ -90,4 +79,39 @@ covid_latest <- function(){
   return(tidy_covid)
 }
 
+#' Pluck the latest ecdc data
+#'
+#' For internal use within covid19 extraction data
+#'
+#' @param data covid19 list of latest data pulled from `try_ecdc`.
+#'
+#' @return single data.frame
+#' @note internal
+#' @export
+pluck_latest_ecdc <- function(data) {
+  # if we have data for both, take the latest date
+  if (all(inherits_data_frames(data))) {
+    covid_latest_dates <- c(max(data[[1]]$date_rep),
+                            max(data[[2]]$date_rep))
 
+    which_is_latest <- which.max(covid_latest_dates)
+
+    latest_data <- data[[which_is_latest]]
+
+    # else, only the "result" has a data.frame
+  } else {
+    latest_data <- pluck_result(data)
+  }
+
+  message(
+    "covid data extracted from ",
+    min(latest_data$date_rep),
+    " UTC",
+    " to ",
+    max(latest_data$date_rep),
+    " UTC"
+  )
+
+  return(latest_data)
+
+}

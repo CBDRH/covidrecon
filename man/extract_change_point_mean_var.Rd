@@ -4,10 +4,12 @@
 \alias{extract_change_point_mean_var}
 \title{Extract changepoint}
 \usage{
-extract_change_point_mean_var(data, ...)
+extract_change_point_mean_var(data, x = "cases", ...)
 }
 \arguments{
 \item{data}{data.frame}
+
+\item{x}{variable name (as character) of cases. Default is "cases".}
 
 \item{...}{params to pass to \code{changepoint::cpt.meanvar}}
 }
