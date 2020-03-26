@@ -12,7 +12,8 @@ add_country_hit_limit(covid_data, limit = 100)
 \item{limit}{defaults to 100}
 }
 \value{
-
+data.frame with additional column "hit limit" indicating the day
+a country passed that limit
 }
 \description{
 Requires that country is called \code{country_region}, date is called \code{date},

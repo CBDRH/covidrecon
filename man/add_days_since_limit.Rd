@@ -12,7 +12,8 @@ add_days_since_limit(covid_data, limit = 100)
 \item{limit}{limit for flagging}
 }
 \value{
-
+data.frame with extra column, "days_since_limit", which contains
+the number of days since the cumulative cases reached 100.
 }
 \description{
 Add a column of the days since some limit of cumulative cases is reached

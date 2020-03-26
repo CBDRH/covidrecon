@@ -4,11 +4,21 @@
 \alias{gg_covid_cumulative_exceed_limit}
 \title{Base plot for creating cumulative cases of covid19 data}
 \usage{
-gg_covid_cumulative_exceed_limit(covid_data)
+gg_covid_cumulative_exceed_limit(
+  covid_data,
+  limit = 100,
+  selected_countries = "Australia"
+)
 }
 \arguments{
 \item{covid_data}{\itemize{
 \item covid19 data.frame
+}}
+
+\item{limit}{limit of cumulative cases}
+
+\item{selected_countries}{\itemize{
+\item character vector of countries to plot
 }}
 }
 \value{

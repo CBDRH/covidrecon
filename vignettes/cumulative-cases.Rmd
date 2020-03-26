@@ -40,29 +40,6 @@ library(ggrepel)
 covid <- covid_latest()
 ```
 
-```{r}
-covid %>% 
-  filter(geo_id == "CN") %>% 
-  ggplot(aes(x = date,
-             y = cumulative_cases,
-             group = country_region)) +
-    geom_line() +
-    scale_y_log10()
-```
-
-
-```{r high-incidence-countries}
-high_incidence_countries <- covid_high_incidence(covid)
-
-high_incidence_countries %>% 
-  filter(geo_id == "CN") %>% 
-  ggplot(aes(x = date_since_limit_cases,
-             y = cumulative_cases,
-             group = country_region)) +
-    geom_line() +
-    scale_y_log10()
-```
-
 ```{r select-countries}
 selected_countries <- c("China",
                         "Singapore",
@@ -78,49 +55,35 @@ selected_countries <- c("China",
 
 ```
 
+```{r}
+covid_over_100 <- covid %>% 
+  filter_country_over_limit(limit = 100)
+```
+
 
 ```{r get-latest-data-highlight}
-library(gghighlight)
-
-gg_covid_cumulative_cases(high_incidence_countries)
-
-covid %>% 
-  filter(country_region %in% c("Australia", "Italy")) %>% 
-  gg_covid_cumulative_cases() +
-  geom_line(aes(colour = country_region))
-
-# # sanity check the data
-# cdc <- NCoVUtils::get_ecdc_cases()
-# 
-# cdc %>% 
-#   arrange(country, date) %>% 
-#   group_by(country) %>% 
-#   mutate(cumulative_cases = cumsum(cases)) %>% 
-#   ungroup() %>% 
-#   # filter(country %in% c("Australia", "Italy")) %>% 
-#   ggplot(aes(x = date,
-#              y = cumulative_cases,
-#              group = country)) + 
-#   geom_line() +
-#   scale_y_log10()
-  
+gg_covid_cumulative_cases(covid_over_100)
 ```
 
 ## The "Grattan Institute" cumulative incidence plot
 
 https://blog.grattan.edu.au/2020/03/australian-governments-can-choose-to-slow-the-spread-of-coronavirus-but-they-must-act-immediately/
 
+```{r since-100}
+covid_since_100 <- covid %>% 
+  add_days_since_limit(limit = 100) %>% 
+  filter(days_since_limit >= 0)
+```
+
+
+```{r filter}
+covid_since_100_selected <- covid_since_100 %>% 
+  filter(country_region %in% selected_countries)
+covid_since_100_selected
+```
+
 ```{r}
-high_incidence_countries %>% 
-  filter(date_since_limit_cases >= 0 ) %>% 
-  filter(country_region %in% selected_countries) %>% 
-  gg_covid_cumulative_exceed_limit() + 
-  labs(caption = 
-  "CC BY-NC-SA Tim Churches (UNSW)
-  Nick Tierney (Monash)
-  Data source: European CDC"
-    )
-
-
+gg_covid_cumulative_exceed_limit(covid,
+                                 selected_countries = selected_countries)
 ```
 

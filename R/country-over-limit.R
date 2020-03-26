@@ -6,7 +6,8 @@
 #' @param covid_data covid19 data with cumulative cases for each country
 #' @param limit defaults to 100
 #'
-#' @return
+#' @return data.frame with additional column "hit limit" indicating the day
+#'   a country passed that limit
 #' @export
 #'
 #' @examples
@@ -112,10 +113,9 @@ filter_country_over_limit <- function(covid_data, limit = 100){
 #' @param covid_data covid19 data
 #' @param limit limit for flagging
 #'
-#' @return
+#' @return data.frame with extra column, "days_since_limit", which contains
+#'   the number of days since the cumulative cases reached 100.
 #' @export
-#'
-#' @examples
 add_days_since_limit <- function(covid_data, limit = 100) {
   # return a dataset that just contains the country and the date they started
   # reaching certain cumulative cases

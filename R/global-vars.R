@@ -39,6 +39,9 @@ globalVariables(
     "repro_estimate",
     "repro_result",
     "result",
-    "year"
+    "year",
+    "covid",
+    "date_start_limit",
+    "days_since_limit"
     )
   )
