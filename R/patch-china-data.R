@@ -2,6 +2,7 @@
 #'
 #' In Mid February, China changed their case definition, from
 #'   RT-PCR-swab-positive to test-positive or clinical signs of viral pneumonia.
+<<<<<<< HEAD
 #'   This led to a large spike not representative of cases.
 #'   some further thoughts:
 #'    \url{https://www.worldometers.info/coronavirus/how-to-interpret-feb-12-case-surge/}
@@ -11,8 +12,14 @@
 #'   Note that the EuroCDC data has dates a day later than the wikipedia data for China
 #'   due to time zone differences. This adjustment is only valid for EuroCDC data, for the JHU
 #'   data the dates for the adjustments need to be shifted back on day.
+
+#'     - 13/2/2020 to 1820 cases (from 15141),
+#'     - 14/2/2020 to 1995 cases (from 3237),
+#'     - 15/2/2020 to 1503 cases (from 2538),
+#'     - 16/2/2020 to 1121 cases (from 2007),
 #'
-#' @param data data pulled by
+#'
+#' @param data data pulled by `try_ecdc` and `pluck_latest`.
 #' @note internal
 #'
 #' @return data.frame with adjusted cases

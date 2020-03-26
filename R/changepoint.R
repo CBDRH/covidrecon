@@ -48,7 +48,8 @@ covid_change_point <- function(covid_data,
     dplyr::filter(n_days == change_day) %>%
     dplyr::rename(change_point_date = date) %>%
     dplyr::select(country_region,
-           change_point_date)
+           change_point_date) %>%
+    dplyr::ungroup()
 }
 
 #' Adds changepoint date based on `changepoint::cpt.meanvar`
@@ -57,7 +58,7 @@ covid_change_point <- function(covid_data,
 #' @param x variable name (as character) of cases. Default is "cases".
 #' @param ... params to pass to `changepoint::cpt.meanvar`
 #'
-#' @return
+#' @return ggplot2 plot
 #' @export
 add_covid_change_point <- function(covid_data,
                                    x = "cases",
