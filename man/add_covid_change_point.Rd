@@ -14,7 +14,7 @@ add_covid_change_point(covid_data, x = "cases", ...)
 \item{...}{params to pass to \code{changepoint::cpt.meanvar}}
 }
 \value{
-
+ggplot2 plot
 }
 \description{
 Adds changepoint date based on \code{changepoint::cpt.meanvar}

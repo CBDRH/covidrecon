@@ -33,7 +33,7 @@ highlight_countries <- c("Japan",
                          "Singapore",
                          "Italy",
                          "Iran",
-                         # "China",
+                         "China",
                          "France",
                          "United_Kingdom",
                          "Sweden",
@@ -43,21 +43,43 @@ highlight_countries <- c("Japan",
 
 ```{r covid-highlight}
 covid_highlighted <- covid_changepoint %>% 
-  filter(country_region %in% c(highlight_countries, 
+  filter(country_region %in% c(highlight_countries,
                                "United_States_of_America", 
                                "Germany", 
                                "Denmark"))
 ```
 
+# Incident Cases
 
-```{r, fig.width=8, fig,height=16}
+```{r covid-incident-cases, fig.width = 8, fig.height = 16}
 gg_covid_cases(covid_highlighted) +
   facet_grid(country_region ~ ., 
              scales = "free_y") +
-  geom_vline(aes(xintercept = change_point_date)) 
+  geom_vline(aes(xintercept = change_point_date),
+             colour = "salmon")
+```
 
+# Cumulative Cases
+
+```{r covid-cumulative-cases, fig.width = 8, fig.height = 16}
 gg_covid_cumulative_cases(covid_highlighted) +
   facet_grid(country_region ~ ., 
              scales = "free_y") +
-  geom_vline(aes(xintercept = change_point_date)) 
+  geom_vline(aes(xintercept = change_point_date),
+                 colour = "salmon")
 ```
+
+# align countries along changepoint
+
+```{r align-countries}
+covid_highlighted %>% 
+  group_by(country_region) %>% 
+  filter(date >= change_point_date) %>%
+  mutate(days_since_change_point = diff_days(date, change_point_date)) %>% 
+  ggplot(aes(x = days_since_change_point,
+             y = cumulative_cases,
+             colour = country_region)) +
+    geom_line() +
+    scale_y_log10()
+```
+

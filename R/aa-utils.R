@@ -28,3 +28,15 @@ create_title_date <- function(covid_data){
   date <- format(max(covid_data$date), "%d %B %Y")
   glue::glue("COVID-19 epidemic trajectories up to {date}")
 }
+
+
+#' Difference in dayes between two dates
+#'
+#' @param x first date
+#' @param y second date
+#'
+#' @return numeric number of days
+#' @export
+diff_days <- function(x, y){
+  as.numeric(difftime(x, y, units = "days"))
+}
