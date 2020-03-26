@@ -2,16 +2,18 @@
 % Please edit documentation in R/high-incidence.R
 \name{covid_high_incidence}
 \alias{covid_high_incidence}
-\title{Return only countries that have more than 100 cases}
+\title{Return only countries that have more than some limit}
 \usage{
-covid_high_incidence(covid_data)
+covid_high_incidence(covid_data, limit = 100)
 }
 \arguments{
 \item{covid_data}{data pulled from \code{covid_pull_data()}}
+
+\item{limit}{when countries hit some limit. default is 100}
 }
 \value{
 high incidence data
 }
 \description{
-Return only countries that have more than 100 cases
+Return only countries that have more than some limit
 }

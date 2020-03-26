@@ -14,7 +14,7 @@ contains data of class "Date", and "I" contains cases.}
 \item{estimate_method}{default is "parametric_si"}
 }
 \value{
-
+estimated reproductive number
 }
 \description{
 This fits EpiEstim::estimate_R, with config values \code{mean_si = 5.0} and

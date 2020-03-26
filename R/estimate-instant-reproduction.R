@@ -25,7 +25,7 @@ covid_prepare_estimate_repro <- function(covid_data){
 #'   contains data of class "Date", and "I" contains cases.
 #' @param estimate_method default is "parametric_si"
 #'
-#' @return
+#' @return estimated reproductive number
 #' @export
 covid_estimate_repro <- function(covid_data_prepared,
                                  estimate_method = "parametric_si"){
@@ -75,7 +75,7 @@ tidy_repro_estimate <- function(covid_estimated_reproduction){
 #' @export
 estimate_repro_all <- function(covid_data){
   covid_data %>%
-    dplyr::group_by(country_region) %>%
+    dplyr::group_by(geo_id) %>%
     tidyr::nest() %>%
     dplyr::mutate(prepared_data = purrr::map(data, covid_prepare_estimate_repro),
                   repro_estimate = purrr::map(prepared_data,
@@ -88,14 +88,14 @@ estimate_repro_all <- function(covid_data){
 #'
 #' @param covid_data_estimated covid19 data estimated with `estimate_repro_all`
 #'
-#' @return
+#' @return data.frame
 #' @export
 augment_estimate_repro <- function(covid_data_estimated){
   covid_data_estimated %>%
-    dplyr::select(country_region,
+    dplyr::select(geo_id,
                   result) %>%
     tidyr::unnest(cols = c(result))  %>%
-    dplyr::select(country_region,
+    dplyr::select(geo_id,
                   date,
                   dplyr::everything()) %>%
     dplyr::ungroup()
@@ -109,10 +109,10 @@ augment_estimate_repro <- function(covid_data_estimated){
 #' @export
 country_repro_errors <- function(covid_data_estimated){
   covid_data_estimated %>%
-    dplyr::select(country_region,
+    dplyr::select(geo_id,
                   result) %>%
     dplyr::mutate(no_result = purrr::map_lgl(result, function(x) nrow(x) == 0)) %>%
     dplyr::filter(no_result) %>%
-    dplyr::pull(country_region)
+    dplyr::pull(geo_id)
 
 }

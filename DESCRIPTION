@@ -34,11 +34,15 @@ Imports:
     httr,
     glue,
     purrr,
-    rlang
+    rlang,
+    ggplot2,
+    EpiEstim,
+    changepoint,
+    ggrepel,
+    vctrs
 Suggests: 
     knitr,
     rmarkdown,
-    gghighlight,
-    ggplot2
+    gghighlight
 VignetteBuilder: knitr
 RoxygenNote: 7.1.0

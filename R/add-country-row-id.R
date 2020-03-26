@@ -6,8 +6,8 @@
 #' @export
 add_country_row_id <- function(covid_data){
   covid_data %>%
-    dplyr::arrange(country_region, date) %>%
-    dplyr::group_by(country_region) %>%
+    dplyr::arrange(geo_id, date) %>%
+    dplyr::group_by(geo_id) %>%
     dplyr::mutate(n_days = dplyr::row_number()) %>%
     dplyr::ungroup()
 }

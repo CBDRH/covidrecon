@@ -14,7 +14,7 @@ extract_change_point_mean_var(data, x = "cases", ...)
 \item{...}{params to pass to \code{changepoint::cpt.meanvar}}
 }
 \value{
-
+changepoint vars
 }
 \description{
 Extract changepoint

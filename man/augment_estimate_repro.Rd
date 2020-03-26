@@ -10,7 +10,7 @@ augment_estimate_repro(covid_data_estimated)
 \item{covid_data_estimated}{covid19 data estimated with \code{estimate_repro_all}}
 }
 \value{
-
+data.frame
 }
 \description{
 Tidies output of \code{estimate_repro_all}

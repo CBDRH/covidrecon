@@ -61,7 +61,7 @@ covid_latest <- function(patch = TRUE){
                   country_region = countries_and_territories) %>%
     # dplyr::arrange(country_region, desc(date)) %>%
     dplyr::arrange(date) %>%
-    dplyr::group_by(country_region) %>%
+    dplyr::group_by(geo_id) %>%
     dplyr::mutate(cumulative_cases = cumsum(cases)) %>%
     dplyr::ungroup() %>%
     dplyr::select(date,
@@ -73,7 +73,7 @@ covid_latest <- function(patch = TRUE){
                   month,
                   day,
                   dplyr::everything()) %>%
-    dplyr::arrange(country_region, date)
+    dplyr::arrange(geo_id, date)
 
 
   return(tidy_covid)

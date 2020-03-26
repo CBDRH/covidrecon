@@ -22,9 +22,8 @@ library(ggplot2)
 
 ```{r covid}
 covid <- covid_latest()
-covid_high_incidence <- covid_high_incidence(covid)
-covid_changepoint <- add_covid_change_point(covid_high_incidence)
-  
+covid_highest <- covid_high_incidence(covid)
+covid_changepoint <- add_covid_change_point(covid_highest)
 ```
 
 ```{r highlight-countries}
@@ -43,10 +42,10 @@ highlight_countries <- c("Japan",
 
 ```{r covid-highlight}
 covid_highlighted <- covid_changepoint %>% 
-  filter(country_region %in% c(highlight_countries,
-                               "United_States_of_America", 
-                               "Germany", 
-                               "Denmark"))
+  filter(country_region %in%  c(highlight_countries,
+                                "United_States_of_America", 
+                                "Germany", 
+                                "Denmark"))
 ```
 
 # Incident Cases

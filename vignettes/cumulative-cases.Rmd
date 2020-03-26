@@ -22,7 +22,7 @@ vignette: >
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = FALSE, 
                       cache = FALSE,
-                      collapse = TRUE
+                      collapse = TRUE,
                       tidy.opts = list(width.cutoff = 60),
                       tidy = TRUE)
 ```
@@ -32,35 +32,35 @@ library(covidrecon)
 library(dplyr)
 library(ggplot2)
 library(lubridate)
-library(tibble)
 library(ggplot2)
-library(ggthemes)
-library(hrbrthemes)
-library(gt)
-library(deSolve)
-library(EpiEstim)
-library(incidence)
-library(distcrete)
-library(epitrix)
-library(projections)
-library(ggiraph)
 library(ggrepel)
-
-version <- "1.8"
-version_date <- lubridate::ymd("2020-02-28")
-
 ```
-
-https://blog.grattan.edu.au/2020/03/australian-governments-can-choose-to-slow-the-spread-of-coronavirus-but-they-must-act-immediately/
 
 ```{r get-latest-data}
 covid <- covid_latest()
 ```
 
+```{r}
+covid %>% 
+  filter(geo_id == "CN") %>% 
+  ggplot(aes(x = date,
+             y = cumulative_cases,
+             group = country_region)) +
+    geom_line() +
+    scale_y_log10()
+```
+
+
 ```{r high-incidence-countries}
-high_incidence_countries <- covid_high_incidence(covid) %>% 
-  mutate(alpha = ifelse(country_region == "Australia", 1, 0.7)) %>% 
-  filter(normalised_date >= 0)
+high_incidence_countries <- covid_high_incidence(covid)
+
+high_incidence_countries %>% 
+  filter(geo_id == "CN") %>% 
+  ggplot(aes(x = date_since_limit_cases,
+             y = cumulative_cases,
+             group = country_region)) +
+    geom_line() +
+    scale_y_log10()
 ```
 
 ```{r select-countries}
@@ -71,10 +71,10 @@ selected_countries <- c("China",
                         "Italy",
                         "Spain",
                         "US",
-                        "United Kingdom",
+                        "United_Kingdom",
                         "Australia",
                         "France",
-                        "Korea, South")
+                        "South_Korea")
 
 ```
 
@@ -82,47 +82,45 @@ selected_countries <- c("China",
 ```{r get-latest-data-highlight}
 library(gghighlight)
 
-gg_covid_cumulative(high_incidence_countries)
+gg_covid_cumulative_cases(high_incidence_countries)
 
-high_incidence_countries %>% 
+covid %>% 
   filter(country_region %in% c("Australia", "Italy")) %>% 
-  add_country_label() %>% 
-  gg_covid_cumulative() +
-  geom_covid_country_label() +
-  scale_x_continuous(expand = expansion(mult = c(0, 0.2)))
-```
+  gg_covid_cumulative_cases() +
+  geom_line(aes(colour = country_region))
 
-```{r highlight-countries}
-highlight_countries <- c("Japan",
-                         "Korea, South",
-                         "Singapore",
-                         "Italy",
-                         "Iran",
-                         "China",
-                         "France",
-                         "United Kingdom",
-                         "Sweden",
-                         "Australia")
-
-high_incidence_countries_extra <- high_incidence_countries %>%
-  covid_highlight_australia_plus(plus = highlight_countries) %>% 
-  add_country_label() %>% 
-  filter(normalised_date >= 0,
-         country_region != "Cruise Ship")
-```
-
-## The "Grattan Institute" plot
-
-```{r, layout="l-page"}
-covid_date_normalised <- covid_highlighted %>%
-  filter(date_since_100_cases >= 0,
-         country_region != "Cruise Ship")
-
-gg_covid_cumulative_exceed_100(covid_date_normalised) +
-  labs(caption = 
-  "CC BY-NC-SA Tim Churches (UNSW)
-  Nick Tierney
-  Data source: European CDC"
-    )
+# # sanity check the data
+# cdc <- NCoVUtils::get_ecdc_cases()
+# 
+# cdc %>% 
+#   arrange(country, date) %>% 
+#   group_by(country) %>% 
+#   mutate(cumulative_cases = cumsum(cases)) %>% 
+#   ungroup() %>% 
+#   # filter(country %in% c("Australia", "Italy")) %>% 
+#   ggplot(aes(x = date,
+#              y = cumulative_cases,
+#              group = country)) + 
+#   geom_line() +
+#   scale_y_log10()
   
 ```
+
+## The "Grattan Institute" cumulative incidence plot
+
+https://blog.grattan.edu.au/2020/03/australian-governments-can-choose-to-slow-the-spread-of-coronavirus-but-they-must-act-immediately/
+
+```{r}
+high_incidence_countries %>% 
+  filter(date_since_limit_cases >= 0 ) %>% 
+  filter(country_region %in% selected_countries) %>% 
+  gg_covid_cumulative_exceed_limit() + 
+  labs(caption = 
+  "CC BY-NC-SA Tim Churches (UNSW)
+  Nick Tierney (Monash)
+  Data source: European CDC"
+    )
+
+
+```
+

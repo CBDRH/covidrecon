@@ -14,7 +14,7 @@ covid_change_point(covid_data, x = "cases", ...)
 \item{...}{params to pass to \code{changepoint::cpt.meanvar}}
 }
 \value{
-
+data.frame of changepoints
 }
 \description{
 Calculate changepoint date using \code{changepoint::cpt.meanvar}

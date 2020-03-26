@@ -82,8 +82,8 @@ covid_tidy_repro
 countries_errors <- country_repro_errors(covid_estimated_repro)
 
 covid_estimated_repro %>% 
-  filter(country_region %in% countries_errors) %>% 
-  select(country_region,
+  filter(geo_id %in% countries_errors) %>% 
+  select(geo_id,
          repro_estimate) %>% 
   unnest(cols = c(repro_estimate)) %>% 
   slice(2) %>% 
@@ -91,11 +91,11 @@ covid_estimated_repro %>%
 ```
 
 
-```{r, eval=TRUE, echo=FALSE, fig.height=8, fig.width=8, layout="l-page"}
+```{r, eval=FALSE, echo=FALSE, fig.height=8, fig.width=8, layout="l-page"}
 start_dates <- high_incidence_countries %>%
   filter(hit_100 == TRUE) %>%
-  rename(country=country_region,
-         start_date=Date) %>%
+  rename(country = country_region,
+         start_date = Date) %>%
   select(country, start_date)
 
 country_eff_Rs <- country_eff_Rs %>%
@@ -112,7 +112,7 @@ label_country_eff_Rs <- country_eff_Rs %>%
   
 ```
 
-```{r, fig.height=8, fig.width=8, layout="l-page"}
+```{r, eval = FALSE, fig.height=8, fig.width=8, layout="l-page"}
 country_eff_Rs %>%
   ggplot(aes(x=Date, y=mean_R, colour=country)) +
   geom_line(size=1.5) +
@@ -133,7 +133,7 @@ country_eff_Rs %>%
 
 ```
 
-```{r, fig.height=8, fig.width=8, layout="l-page"}
+```{r, eval = FALSE, fig.height=8, fig.width=8, layout="l-page"}
 country_eff_Rs %>%
   ggplot(aes(x=Date, y=mean_R, colour=country)) +
   geom_line(size=1.5) +
