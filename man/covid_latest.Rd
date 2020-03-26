@@ -7,7 +7,7 @@
 covid_latest(patch = TRUE)
 }
 \arguments{
-\item{patch}{logical. Patch China miscounts see \code{\link[=patch_china_data]{patch_china_data()}}.
+\item{patch}{logical. Patch China miscounts see \code{\link[=patch_data]{patch_data()}}.
 Default is TRUE.}
 }
 \value{

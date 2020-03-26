@@ -41,7 +41,7 @@ try_ecdc <- function(){
 #'
 #' This pull data from \url{https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide}
 #'
-#' @param patch logical. Patch China miscounts see [patch_china_data()].
+#' @param patch logical. Patch China miscounts see [patch_data()].
 #'   Default is TRUE.
 #'
 #' @return data.frame
@@ -53,7 +53,7 @@ covid_latest <- function(patch = TRUE){
   latest_data <- pluck_latest_ecdc(data)
 
   if (patch) {
-    latest_data <- patch_china_data(latest_data)
+    latest_data <- patch_data(latest_data)
   }
 
   tidy_covid <- latest_data %>%
