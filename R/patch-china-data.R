@@ -2,7 +2,6 @@
 #'
 #' In Mid February, China changed their case definition, from
 #'   RT-PCR-swab-positive to test-positive or clinical signs of viral pneumonia.
-<<<<<<< HEAD
 #'   This led to a large spike not representative of cases.
 #'   some further thoughts:
 #'    \url{https://www.worldometers.info/coronavirus/how-to-interpret-feb-12-case-surge/}
