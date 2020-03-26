@@ -24,25 +24,7 @@ library(purrr)
 
 ```{r}
 covid <- covid_latest()
-
-covid_high_incidence <- covid_high_incidence(covid)
-
-covid_changepoint <- add_covid_change_point(covid_high_incidence)
-
 ```
-
-# explore china data
-
-```{r}
-covid_china <- covid %>% 
-  filter(country_region == "China")
-
-ggplot(covid_china,
-       aes(x = date,
-           y = cumulative_cases)) + 
-  geom_line()
-```
-
 
 ```{r highlight-countries}
 highlight_countries <- c("Japan",
@@ -50,7 +32,7 @@ highlight_countries <- c("Japan",
                          "Singapore",
                          "Italy",
                          "Iran",
-                         # "China",
+                         "China",
                          "France",
                          "United_Kingdom",
                          "Sweden",
@@ -59,106 +41,32 @@ highlight_countries <- c("Japan",
 ```
 
 ```{r covid-highlight}
-covid_highlighted <- covid_changepoint %>% 
+covid_subset <- covid %>% 
   filter(country_region %in% c(highlight_countries, 
                                "United_States_of_America", 
                                "Germany", 
                                "Denmark"))
+
+covid_changepoint <- covid_subset %>% 
+  add_covid_change_point() %>% 
+  filter(date >= change_point_date)
 ```
 
 ## Instantaneous effective reproduction number
 
 ```{r}
-covid_estimated_repro <- covid_changepoint %>% 
-  filter(date >= change_point_date) %>% 
-  estimate_repro_all()
-
-covid_tidy_repro <- augment_estimate_repro(covid_estimated_repro)
-
-covid_tidy_repro
+covid_instant_r <- add_instant_reproduction(covid_changepoint)
 ```
 
-```{r}
-countries_errors <- country_repro_errors(covid_estimated_repro)
-
-covid_estimated_repro %>% 
-  filter(geo_id %in% countries_errors) %>% 
-  select(geo_id,
-         repro_estimate) %>% 
-  unnest(cols = c(repro_estimate)) %>% 
-  slice(2) %>% 
-  pull(repro_estimate) 
-```
-
-
-```{r, eval=FALSE, echo=FALSE, fig.height=8, fig.width=8, layout="l-page"}
-start_dates <- high_incidence_countries %>%
-  filter(hit_100 == TRUE) %>%
-  rename(country = country_region,
-         start_date = Date) %>%
-  select(country, start_date)
-
-country_eff_Rs <- country_eff_Rs %>%
-  left_join(start_dates) %>%
-  filter(Date >= start_date) %>%
-  rename(mean_R="Mean(R)")
-
-label_country_eff_Rs <- country_eff_Rs %>%
-  arrange(country, Date) %>%
-  group_by(country) %>%
-  summarise(clabel_x = max(Date),
-            clabel_y = last(mean_R)) %>%
-  ungroup()
-  
+```{r gg-effective-r, eval = TRUE, fig.height=8, fig.width=8, layout="l-page"}
+gg_effective_repro_facet(covid_instant_r)
 ```
 
 ```{r, eval = FALSE, fig.height=8, fig.width=8, layout="l-page"}
-country_eff_Rs %>%
-  ggplot(aes(x=Date, y=mean_R, colour=country)) +
-  geom_line(size=1.5) +
-  geom_hline(yintercept = 1.0, colour="red") +
-  facet_wrap(~country, ncol = 2) +
-  scale_y_log10() +
-  scale_x_date(date_breaks = "1 week",
-               date_labels = "%d %b") +
-  labs(title=paste("7-day sliding window of effective reproduction number up to",
-                   format(max(country_eff_Rs$Date), "%d %B %Y")),
-       subtitle="Outbreak is under control if effective R is under red line",
-       x = "End date of 7-day sliding window",
-       y="Effective R (log scale)",
-       caption=paste0("CC BY-NC-SA Tim Churches (UNSW)\n",
-                      "Data source: Johns Hopkins University")) +
-  theme_dark() + 
-  theme(legend.position = "none") 
+
+gg_effective_repro_all(covid_instant_r)
 
 ```
-
-```{r, eval = FALSE, fig.height=8, fig.width=8, layout="l-page"}
-country_eff_Rs %>%
-  ggplot(aes(x=Date, y=mean_R, colour=country)) +
-  geom_line(size=1.5) +
-  geom_hline(yintercept = 1.0, colour="red") +
-  geom_label_repel(data=label_country_eff_Rs,
-                   aes(x=clabel_x, y=clabel_y, label=country),
-             hjust = 0, nudge_x = 0.2, xlim=c(max(country_eff_Rs$Date) + days(1),
-                                              max(country_eff_Rs$Date) + days(5))) +
-  scale_y_log10() +
-  scale_x_date(date_breaks = "1 week",
-               date_labels = "%d %b",
-               expand = expansion(add=c(0,5))) +
-  scale_colour_viridis_d() +
-  labs(title=paste("7-day sliding window of effective reproduction number up to",
-                   format(max(country_eff_Rs$Date), "%d %B %Y")),
-       subtitle="Outbreak is under control if effective R is under red line",
-       x = "End date of 7-day sliding window",
-       y="Effective R (log scale)",
-       caption=paste0("CC BY-NC-SA Tim Churches (UNSW)\n",
-                      "Data source: Johns Hopkins University")) +
-  theme_dark() + 
-  theme(legend.position = "none") 
-
-```
-
 
 
 ```{r eval = FALSE}
@@ -173,7 +81,7 @@ girafe(ggobj = .,
          opts_toolbar(position = "topright", saveaspng = TRUE)
        ))
 
-hubei_incidence_function_data <- provinces_confirmed_jh %>%
+hubei_incidence_function_data <- covid %>%
       filter(date >= ymd("2020-01-11")) %>% 
       mutate(HubeiSansWuhan = if_else(
         condition = is.na(HubeiSansWuhan), 
@@ -185,4 +93,19 @@ hubei_incidence_function_data <- provinces_confirmed_jh %>%
     select(Date, incident_cases) 
     %>% uncount(incident_cases)
 hubei_incidence_object <- incidence(hubei_incidence_function_data$Date)
+```
+
+
+# exploring errors
+
+```{r}
+countries_errors <- country_repro_errors(covid_estimated_repro)
+
+covid_estimated_repro %>% 
+  filter(geo_id %in% countries_errors) %>% 
+  select(geo_id,
+         repro_estimate) %>% 
+  unnest(cols = c(repro_estimate)) %>% 
+  slice(2) %>% 
+  pull(repro_estimate) 
 ```

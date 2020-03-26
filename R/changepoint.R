@@ -28,6 +28,7 @@ covid_change_point <- function(covid_data,
                                ...){
 
   covid_data %>%
+    add_country_row_id() %>%
     dplyr::group_by(geo_id) %>%
     dplyr::filter(cumulative_cases > 0) %>%
     dplyr::arrange(date) %>%

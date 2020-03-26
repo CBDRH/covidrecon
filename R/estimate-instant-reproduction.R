@@ -80,7 +80,9 @@ estimate_repro_all <- function(covid_data){
     dplyr::mutate(prepared_data = purrr::map(data, covid_prepare_estimate_repro),
                   repro_estimate = purrr::map(prepared_data,
                                               purrr::safely(covid_estimate_repro)),
-                  repro_result = purrr::map(repro_estimate, pluck, "result"),
+                  repro_result = purrr::map(repro_estimate,
+                                            purrr::pluck,
+                                            "result"),
                   result = purrr::map(repro_result, tidy_repro_estimate))
 }
 
@@ -115,4 +117,23 @@ country_repro_errors <- function(covid_data_estimated){
     dplyr::filter(no_result) %>%
     dplyr::pull(geo_id)
 
+}
+
+
+#' Add instant reproduction number measures to provided covid19 data
+#'
+#' @param covid_data covid19 data
+#'
+#' @return data.frame with covid19 columns plus output of `EpiEstim::estimate_R`
+#'  and columns on estimated mean R values and quantiles etc.
+#' @export
+add_instant_reproduction <- function(covid_data){
+  tidy_instant <- covid_data %>%
+    estimate_repro_all() %>%
+    augment_estimate_repro()
+
+  covid_data %>%
+    dplyr::mutate(date = as.Date(date)) %>%
+    dplyr::left_join(tidy_instant,
+                     by = c("geo_id", "date"))
 }
