@@ -42,6 +42,7 @@ globalVariables(
     "year",
     "covid",
     "date_start_limit",
-    "days_since_limit"
+    "days_since_limit",
+    "mean_r"
     )
   )

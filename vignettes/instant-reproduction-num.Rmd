@@ -98,7 +98,7 @@ hubei_incidence_object <- incidence(hubei_incidence_function_data$Date)
 
 # exploring errors
 
-```{r}
+```{r eval = FALSE}
 countries_errors <- country_repro_errors(covid_estimated_repro)
 
 covid_estimated_repro %>% 

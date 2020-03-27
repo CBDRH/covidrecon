@@ -28,13 +28,11 @@ gg_covid_cumulative_cases <- function(covid_data){
 
 #' Plot effective reproduction number
 #'
-#' @param covid_effective_r
+#' @param covid_effective_r covid19 data with estimated effective R
 #'
-#' @return
-#' @export
-#'
-#' @examples
+#' @return ggplot2 plot
 #' @rdname effective-repro
+#' @export
 gg_effective_repro_all <- function(covid_effective_r){
   last_country_eff_rs <- covid_effective_r %>%
     dplyr::group_by(geo_id) %>%
@@ -52,7 +50,8 @@ gg_effective_repro_all <- function(covid_effective_r){
       segment.alpha = 0.3,
       segment.size = 0.3,
       hjust = 0,
-      nudge_x = 0.2,
+      # direction = "x",
+      nudge_x = 0.5,
       xlim = c(
         max(covid_effective_r$date) + lubridate::days(1),
         max(covid_effective_r$date) + lubridate::days(5)
@@ -62,7 +61,7 @@ gg_effective_repro_all <- function(covid_effective_r){
     scale_x_date(
       date_breaks = "1 week",
       date_labels = "%d %b",
-      expand = expansion(mult = c(0, 1))
+      expand = expansion(mult = c(0, 0.25))
     ) +
     scale_colour_brewer(palette = "Dark2") +
     # scale_colour_viridis_d() +
@@ -79,7 +78,7 @@ gg_effective_repro_all <- function(covid_effective_r){
                Nick Tierney (Monash)
                Data source: European CDC"
     ) +
-    theme_dark() +
+    theme_minimal() +
     theme(legend.position = "none")
 
 }
@@ -111,7 +110,7 @@ gg_effective_repro_facet <- function(covid_effective_repro){
                Nick Tierney (Monash)
                Data source: European CDC"
   ) +
-  theme_dark() +
+  theme_minimal() +
   theme(legend.position = "none")
 
 }

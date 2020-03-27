@@ -11,10 +11,10 @@ gg_effective_repro_all(covid_effective_r)
 gg_effective_repro_facet(covid_effective_repro)
 }
 \arguments{
-\item{covid_effective_r}{}
+\item{covid_effective_r}{covid19 data with estimated effective R}
 }
 \value{
-
+ggplot2 plot
 }
 \description{
 Plot effective reproduction number
