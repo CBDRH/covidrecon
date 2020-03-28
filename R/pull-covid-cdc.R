@@ -14,6 +14,7 @@ covid_ecdc <- function(date){
   httr::GET(url = url,
       config = httr::authenticate(":", ":", type="ntlm"),
       httr::write_disk(tf <- tempfile(fileext = ".xlsx")))
+
   readxl::read_excel(tf, .name_repair = janitor::make_clean_names)
 }
 
@@ -21,14 +22,26 @@ covid_ecdc <- function(date){
 #'
 #' Assuming CET time zones. For use within `latest_covid()`.
 #'
+#' @param memoise do you want to memoise (cache the data?). Default is TRUE
+#'
 #' @return list of yesterdays and today's COVID19 data
 #' @export
-try_ecdc <- function(){
+try_ecdc <- function(memoise = TRUE){
 
   todays_date <- format(lubridate::today(tz = "CET"), "%Y-%m-%d")
   yesterday <- format(lubridate::today(tz = "CET") - 1L, "%Y-%m-%d")
 
-  safe_covid_ecdc <- purrr::safely(covid_ecdc)
+  # memoise covid19 data
+  if (memoise) {
+    covid_cache <- memoise::cache_filesystem(".covid_cache")
+    memoise_covid <- memoise::memoise(covid_ecdc, cache = covid_cache)
+  }
+
+  if (!is.null(git2r::discover_repository("."))) {
+    usethis::use_git_ignore(".covid_cache")
+  }
+
+  safe_covid_ecdc <- purrr::safely(memoise_covid)
   purrr::flatten(
     list(
       today = discard_null(safe_covid_ecdc(todays_date)),
@@ -43,12 +56,13 @@ try_ecdc <- function(){
 #'
 #' @param patch logical. Patch China miscounts see [patch_data()].
 #'   Default is TRUE.
+#' @param memoise do you want to memoise (cache the data?). Default is TRUE
 #'
 #' @return data.frame
 #' @export
-covid_latest <- function(patch = TRUE){
+covid_latest <- function(patch = TRUE, memoise = TRUE){
 
-  data <- try_ecdc()
+  data <- try_ecdc(memoise)
 
   latest_data <- pluck_latest_ecdc(data)
 

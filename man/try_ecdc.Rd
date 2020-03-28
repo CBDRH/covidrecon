@@ -4,7 +4,10 @@
 \alias{try_ecdc}
 \title{Downloads both yesterday and today's COVID19 data}
 \usage{
-try_ecdc()
+try_ecdc(memoise = TRUE)
+}
+\arguments{
+\item{memoise}{do you want to memoise (cache the data?). Default is TRUE}
 }
 \value{
 list of yesterdays and today's COVID19 data

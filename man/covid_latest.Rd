@@ -4,11 +4,13 @@
 \alias{covid_latest}
 \title{Pull latest covid19 data from European CDC}
 \usage{
-covid_latest(patch = TRUE)
+covid_latest(patch = TRUE, memoise = TRUE)
 }
 \arguments{
 \item{patch}{logical. Patch China miscounts see \code{\link[=patch_data]{patch_data()}}.
 Default is TRUE.}
+
+\item{memoise}{do you want to memoise (cache the data?). Default is TRUE}
 }
 \value{
 data.frame
