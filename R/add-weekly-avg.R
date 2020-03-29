@@ -1,4 +1,4 @@
-#' Add Weekly average
+#' Add Weekly average summary, for each country
 #'
 #' @param covid covid19 data
 #' @param ... variables to compute weekly average of
