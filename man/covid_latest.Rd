@@ -10,11 +10,12 @@ covid_latest(patch = TRUE, memoise = TRUE)
 \item{patch}{logical. Patch China miscounts see \code{\link[=patch_data]{patch_data()}}.
 Default is TRUE.}
 
-\item{memoise}{do you want to memoise (cache the data?). Default is TRUE}
+\item{memoise}{do you want to memoise (cache the data?). Default is TRUE.
+This caches the data into \code{.covid_cache}}
 }
 \value{
 data.frame
 }
 \description{
-This pull data from \url{https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide}
+This pull data from \url{https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide}.
 }

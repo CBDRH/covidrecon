@@ -39,7 +39,8 @@ Imports:
     EpiEstim,
     changepoint,
     ggrepel,
-    vctrs
+    vctrs,
+    memoise
 Suggests: 
     knitr,
     rmarkdown,

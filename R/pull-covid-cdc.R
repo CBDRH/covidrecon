@@ -37,10 +37,6 @@ try_ecdc <- function(memoise = TRUE){
     memoise_covid <- memoise::memoise(covid_ecdc, cache = covid_cache)
   }
 
-  if (!is.null(git2r::discover_repository("."))) {
-    usethis::use_git_ignore(".covid_cache")
-  }
-
   safe_covid_ecdc <- purrr::safely(memoise_covid)
   purrr::flatten(
     list(
@@ -52,11 +48,12 @@ try_ecdc <- function(memoise = TRUE){
 
 #' Pull latest covid19 data from European CDC
 #'
-#' This pull data from \url{https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide}
+#' This pull data from \url{https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide}.
 #'
 #' @param patch logical. Patch China miscounts see [patch_data()].
 #'   Default is TRUE.
-#' @param memoise do you want to memoise (cache the data?). Default is TRUE
+#' @param memoise do you want to memoise (cache the data?). Default is TRUE.
+#'   This caches the data into `.covid_cache`
 #'
 #' @return data.frame
 #' @export

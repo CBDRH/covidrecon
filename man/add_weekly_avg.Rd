@@ -2,7 +2,7 @@
 % Please edit documentation in R/add-weekly-avg.R
 \name{add_weekly_avg}
 \alias{add_weekly_avg}
-\title{Add Weekly average}
+\title{Add Weekly average summary, for each country}
 \usage{
 add_weekly_avg(covid, ...)
 }
@@ -15,7 +15,7 @@ add_weekly_avg(covid, ...)
 data frame with weekly average computed
 }
 \description{
-Add Weekly average
+Add Weekly average summary, for each country
 }
 \examples{
 \dontrun{

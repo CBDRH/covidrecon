@@ -8,7 +8,7 @@
 \usage{
 gg_effective_repro_all(covid_effective_r)
 
-gg_effective_repro_facet(covid_effective_repro)
+gg_effective_repro_facet(covid_effective_r)
 }
 \arguments{
 \item{covid_effective_r}{covid19 data with estimated effective R}

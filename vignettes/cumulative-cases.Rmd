@@ -83,7 +83,6 @@ covid_since_100_selected
 ```
 
 ```{r}
-gg_covid_cumulative_exceed_limit(covid,
-                                 selected_countries = selected_countries)
+gg_covid_cumulative_exceed_limit(covid_since_100_selected)
 ```
 
