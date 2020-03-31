@@ -44,13 +44,11 @@ covid <- covid_latest()
 selected_countries <- c("China",
                         "Singapore",
                         "Japan",
-                        "Iran",
                         "Italy",
                         "Spain",
-                        "US",
+                        "United_States_of_America",
                         "United_Kingdom",
                         "Australia",
-                        "France",
                         "South_Korea")
 
 ```

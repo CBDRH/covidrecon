@@ -18,16 +18,19 @@ add_country_hit_limit <- function(covid_data, limit = 100){
     dplyr::arrange(geo_id, date) %>%
     dplyr::mutate(
       lag_cum_cases = lag(cumulative_cases),
-      hit_limit = (
-        geo_id == "CN" & date == min(date)
-        ),
-      hit_limit = dplyr::if_else(
-        condition = geo_id != "CN" &
-          (cumulative_cases >= limit) &
-          (lag_cum_cases < limit),
-        true = TRUE,
-        false = hit_limit
-        ),
+      hit_limit = (cumulative_cases >= limit) & (lag_cum_cases < limit)
+    ) %>%
+      # hit_limit = (
+      #   geo_id == "CN" & date == min(date)
+      #   ),
+      # hit_limit = dplyr::if_else(
+      #   condition =
+      #     # geo_id != "CN" &
+      #     (cumulative_cases >= limit) &
+      #     (lag_cum_cases < limit),
+      #   true = TRUE,
+      #   false = hit_limit
+      #   ),
       # hit_limit = (cumulative_cases >= limit),
       # china was over the limit before data was collected (from before )
       # hit_limit = dplyr::if_else(
@@ -35,7 +38,7 @@ add_country_hit_limit <- function(covid_data, limit = 100){
       #   true = TRUE,
       #   false = FALSE
       # )
-    ) %>%
+    # ) %>%
     # we don't need this anymore
     dplyr::select(-lag_cum_cases) %>%
     dplyr::ungroup()
@@ -119,13 +122,13 @@ filter_country_over_limit <- function(covid_data, limit = 100){
 add_days_since_limit <- function(covid_data, limit = 100) {
   # return a dataset that just contains the country and the date they started
   # reaching certain cumulative cases
-  days_at_start <- covid %>%
+  days_at_start <- covid_data %>%
     add_country_hit_limit(limit = limit) %>%
     dplyr::filter(hit_limit) %>%
     dplyr::select(geo_id,
                   date_start_limit = date)
 
-  dplyr::left_join(x = covid,
+  dplyr::left_join(x = covid_data,
                    y = days_at_start,
                    by = "geo_id") %>%
     dplyr::arrange(geo_id, date) %>%

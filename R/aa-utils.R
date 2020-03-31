@@ -40,3 +40,9 @@ create_title_date <- function(covid_data){
 diff_days <- function(x, y){
   as.numeric(difftime(x, y, units = "days"))
 }
+
+underscore_to_space <- function(x){
+  stringr::str_replace_all(string = x,
+                           pattern = "_",
+                           replacement = " ")
+}

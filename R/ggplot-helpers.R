@@ -145,19 +145,25 @@ gg_covid_cumulative_exceed_limit <- function(covid_data_limit,
          aes(x = days_since_limit,
              y = cumulative_cases,
              colour = country_region)) +
-    geom_line() +
+    geom_line(size = 1, alpha = 0.75) +
     scale_y_log10(labels = scales::comma) +
     scale_x_continuous(expand = expansion(mult = c(0, 0.1))) +
     theme_minimal() +
     labs(y = "Cumulative cases (logarithmic scale)",
          x = glue::glue("Days since cumulative cases exceeded {limit}"),
          title = create_title_date(covid_data_limit)) +
-    ggrepel::geom_label_repel(data = covid_data_last,
-                              aes(label = country_region),
-                              nudge_x = 20,
+    ggrepel::geom_text_repel(data = covid_data_last,
+                              aes(label = underscore_to_space(country_region)),
+                             size = 4,
+                              nudge_x = 4,
                               # direction = "x",
-                              segment.alpha = 0.3,
-                              segment.size = 0.3) +
+                              segment.alpha = 0.2,
+                              segment.size = 0.2
+                             ) +
+    geom_point(data = covid_data_last,
+               size = 2,
+               alpha = 0.75) +
+    scale_colour_brewer(palette = "Paired") +
     theme(legend.position = "none") +
     labs(caption =
            "CC BY-NC-SA Tim Churches (UNSW)

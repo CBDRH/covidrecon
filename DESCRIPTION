@@ -11,8 +11,8 @@ Authors@R: c(
            email = "nicholas.tierney@gmail.com",
            comment = c(ORCID = "https://orcid.org/0000-0003-1460-8722"))
            )
-Description: Simplifies getting COVID19 data and provides
-  data visualisations.
+Description: Provides tools for getting COVID19 data, performing data analysis
+  and doing data visualisations.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Language: es
