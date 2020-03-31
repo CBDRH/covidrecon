@@ -34,15 +34,18 @@ gg_covid_cumulative_cases <- function(covid_data){
 #' @rdname effective-repro
 #' @export
 gg_effective_repro_all <- function(covid_effective_r){
-  last_country_eff_rs <- covid_effective_r %>%
-    dplyr::group_by(geo_id) %>%
-    dplyr::filter(date == dplyr::last(date))
+
+  last_country_eff_rs <- filter_last_country_date(covid_effective_r)
 
   covid_effective_r %>%
     ggplot(aes(x = date,
                y = mean_r,
                colour = country_region)) +
-    geom_line(size = 1) +
+    geom_line(size = 1,
+              alpha = 0.75) +
+    geom_point(data = last_country_eff_rs,
+               size = 2,
+               alpha = 0.75) +
     geom_hline(yintercept = 1.0, colour = "red") +
     ggrepel::geom_label_repel(
       data = last_country_eff_rs,
@@ -63,7 +66,7 @@ gg_effective_repro_all <- function(covid_effective_r){
       date_labels = "%d %b",
       expand = expansion(mult = c(0, 0.25))
     ) +
-    scale_colour_brewer(palette = "Dark2") +
+    scale_colour_brewer(palette = "Paired") +
     # scale_colour_viridis_d() +
     labs(
       title = paste(
@@ -91,7 +94,11 @@ gg_effective_repro_facet <- function(covid_effective_r){
        aes(x = date,
            y = mean_r,
            colour = country_region)) +
-  geom_line(size = 1) +
+    geom_line(size = 1,
+              alpha = 0.75) +
+    geom_point(data = filter_last_country_date(covid_effective_r),
+               size = 2,
+               alpha = 0.75) +
   geom_hline(yintercept = 1.0, colour = "red") +
   facet_wrap( ~ country_region, ncol = 2) +
   scale_y_log10() +
@@ -110,8 +117,9 @@ gg_effective_repro_facet <- function(covid_effective_r){
                Nick Tierney (Monash)
                Data source: European CDC"
   ) +
-  theme_minimal() +
-  theme(legend.position = "none")
+    scale_colour_brewer(palette = "Paired") +
+    theme_minimal() +
+    theme(legend.position = "none")
 
 }
 
@@ -137,15 +145,17 @@ gg_effective_repro_facet <- function(covid_effective_r){
 gg_covid_cumulative_exceed_limit <- function(covid_data_limit,
                                              limit = 100){
 
-  covid_data_last <- covid_data_limit %>%
-    dplyr::group_by(geo_id) %>%
-    dplyr::filter(date == dplyr::last(date))
+  covid_data_last <- filter_last_country_date(covid_data_limit)
 
   ggplot(data = covid_data_limit,
          aes(x = days_since_limit,
              y = cumulative_cases,
              colour = country_region)) +
-    geom_line(size = 1, alpha = 0.75) +
+    geom_line(size = 1,
+              alpha = 0.75) +
+    geom_point(data = covid_data_last,
+               size = 2,
+               alpha = 0.75) +
     scale_y_log10(labels = scales::comma) +
     scale_x_continuous(expand = expansion(mult = c(0, 0.1))) +
     theme_minimal() +
@@ -160,9 +170,6 @@ gg_covid_cumulative_exceed_limit <- function(covid_data_limit,
                               segment.alpha = 0.2,
                               segment.size = 0.2
                              ) +
-    geom_point(data = covid_data_last,
-               size = 2,
-               alpha = 0.75) +
     scale_colour_brewer(palette = "Paired") +
     theme(legend.position = "none") +
     labs(caption =

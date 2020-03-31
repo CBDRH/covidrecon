@@ -54,10 +54,15 @@ try_ecdc <- function(memoise = TRUE){
 #'   Default is TRUE.
 #' @param memoise do you want to memoise (cache the data?). Default is TRUE.
 #'   This caches the data into `.covid_cache`
+#' @param check_australia - do you want to check if Australia has been given
+#'   zero cases for the latest day (since March 16), and if so, replace
+#'   those recent days with NA? Default is TRUE
 #'
 #' @return data.frame
 #' @export
-covid_latest <- function(patch = TRUE, memoise = TRUE){
+covid_latest <- function(patch = TRUE,
+                         memoise = TRUE,
+                         check_australia = TRUE){
 
   data <- try_ecdc(memoise)
 
@@ -88,6 +93,22 @@ covid_latest <- function(patch = TRUE, memoise = TRUE){
                   dplyr::everything()) %>%
     dplyr::arrange(geo_id, date)
 
+  if (check_australia) {
+
+    prop_date <- lubridate::dmy("16-03-2020")
+
+    tidy_covid <- tidy_covid %>%
+      dplyr::mutate(
+        cases = dplyr::case_when(
+          geo_id == "AU" & date > prop_date & cases == 0 ~ NA_real_,
+          TRUE ~ cases
+          ),
+        cumulative_cases = dplyr::case_when(
+          geo_id == "AU" & date > prop_date & cases == 0 ~ NA_real_,
+          TRUE ~ cumulative_cases
+          )
+      )
+    }
 
   return(tidy_covid)
 }

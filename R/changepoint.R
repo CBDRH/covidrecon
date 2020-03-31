@@ -30,7 +30,7 @@ covid_change_point <- function(covid_data,
   covid_data %>%
     add_country_row_id() %>%
     dplyr::group_by(geo_id) %>%
-    dplyr::filter(cumulative_cases > 0) %>%
+    # dplyr::filter(cumulative_cases > 0) %>%
     dplyr::arrange(date) %>%
     dplyr::mutate(n_obs = vctrs::vec_size(geo_id)) %>%
     # remove countries with only 4 observations
@@ -47,6 +47,7 @@ covid_change_point <- function(covid_data,
                   -month,
                   -day,
                   -n_obs)  %>%
+    # dplyr::filter(country_region %in% c("Italy","United_Kingdom")) %>% View()
     dplyr::filter(n_days == change_day) %>%
     dplyr::rename(change_point_date = date) %>%
     dplyr::select(geo_id,

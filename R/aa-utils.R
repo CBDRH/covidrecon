@@ -46,3 +46,9 @@ underscore_to_space <- function(x){
                            pattern = "_",
                            replacement = " ")
 }
+
+filter_last_country_date <- function(covid_data){
+  covid_data %>%
+  dplyr::group_by(geo_id) %>%
+  dplyr::filter(date == dplyr::last(date))
+}

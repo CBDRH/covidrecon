@@ -4,7 +4,7 @@
 \alias{covid_latest}
 \title{Pull latest covid19 data from European CDC}
 \usage{
-covid_latest(patch = TRUE, memoise = TRUE)
+covid_latest(patch = TRUE, memoise = TRUE, check_australia = TRUE)
 }
 \arguments{
 \item{patch}{logical. Patch China miscounts see \code{\link[=patch_data]{patch_data()}}.
@@ -12,6 +12,12 @@ Default is TRUE.}
 
 \item{memoise}{do you want to memoise (cache the data?). Default is TRUE.
 This caches the data into \code{.covid_cache}}
+
+\item{check_australia}{\itemize{
+\item do you want to check if Australia has been given
+zero cases for the latest day (since March 16), and if so, replace
+those recent days with NA? Default is TRUE
+}}
 }
 \value{
 data.frame
