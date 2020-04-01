@@ -24,16 +24,33 @@ covid_prepare_estimate_repro <- function(covid_data){
 #'   `covid_prepare_estimate_repro`, with columns "dates" and "I", where "dates"
 #'   contains data of class "Date", and "I" contains cases.
 #' @param estimate_method default is "parametric_si"
+#' @param si_sample default is NULL - matrix of values related to the Serial
+#'   interval, the time from onset of symptoms.
+#' @param ... named list of arguments to pass to `config_list`. If no arguments
+#'   presented, defaults to `mean_si = 5.0`, and `std_si = 3.0`
 #'
 #' @return estimated reproductive number
 #' @export
 covid_estimate_repro <- function(covid_data_prepared,
-                                 estimate_method = "parametric_si"){
+                                 estimate_method = "parametric_si",
+                                 si_sample = NULL,
+                                 ...){
+
+  config_list <- rlang::dots_list(...)
+
+  # if dots are empty ... given them this default value
+  if (length(config_list == 0)) {
+    config_list <-   list(mean_si = 5.0,
+                          std_si = 3.0)
+  }
+
+
   EpiEstim::estimate_R(covid_data_prepared,
                        method = estimate_method,
                        # method="uncertain_si",
-                       config = EpiEstim::make_config(list(mean_si = 5.0,
-                                                           std_si = 3.0)))
+                       si_sample,
+                       config = EpiEstim::make_config(config_list),
+                       )
   # config = make_config(list(
   # mean_si = 4.8,
   # std_mean_si = 3.0,
@@ -69,17 +86,31 @@ tidy_repro_estimate <- function(covid_estimated_reproduction){
 #' Fits instnat reproduction for each country
 #'
 #' @param covid_data covid19 data
+#' @param estimate_method default is "parametric_si"
+#' @param si_sample default is NULL - matrix of values related to the Serial
+#'   interval, the time from onset of symptoms.
+#' @param ... named list of arguments to pass to `config_list`. If no arguments
+#'   presented, defaults to `mean_si = 5.0`, and `std_si = 3.0`
 #'
 #' @return data.frame with several list columns containing various output of
 #'   `EpiEstim::estimate_R`.
 #' @export
-estimate_repro_all <- function(covid_data){
+estimate_repro_all <- function(covid_data,
+                               estimate_method = "parametric_si",
+                               si_sample = NULL,
+                               ...){
   covid_data %>%
     dplyr::group_by(geo_id) %>%
     tidyr::nest() %>%
-    dplyr::mutate(prepared_data = purrr::map(data, covid_prepare_estimate_repro),
-                  repro_estimate = purrr::map(prepared_data,
-                                              purrr::safely(covid_estimate_repro)),
+    dplyr::mutate(prepared_data = purrr::map(
+      data, covid_prepare_estimate_repro
+      ),
+      repro_estimate = purrr::map(
+        prepared_data,
+        purrr::safely(covid_estimate_repro,
+                      ..1 = estimate_method,
+                      ..2 = si_sample,
+                      ...)),
                   repro_result = purrr::map(repro_estimate,
                                             purrr::pluck,
                                             "result"),

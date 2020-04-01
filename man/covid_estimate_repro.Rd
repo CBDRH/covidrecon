@@ -4,7 +4,12 @@
 \alias{covid_estimate_repro}
 \title{Fit EpiEstim::estimate_R to covid19 data}
 \usage{
-covid_estimate_repro(covid_data_prepared, estimate_method = "parametric_si")
+covid_estimate_repro(
+  covid_data_prepared,
+  estimate_method = "parametric_si",
+  si_sample = NULL,
+  ...
+)
 }
 \arguments{
 \item{covid_data_prepared}{data is in the format provided by
@@ -12,6 +17,12 @@ covid_estimate_repro(covid_data_prepared, estimate_method = "parametric_si")
 contains data of class "Date", and "I" contains cases.}
 
 \item{estimate_method}{default is "parametric_si"}
+
+\item{si_sample}{default is NULL - matrix of values related to the Serial
+interval, the time from onset of symptoms.}
+
+\item{...}{named list of arguments to pass to \code{config_list}. If no arguments
+presented, defaults to \code{mean_si = 5.0}, and \code{std_si = 3.0}}
 }
 \value{
 estimated reproductive number
