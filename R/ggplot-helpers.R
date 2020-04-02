@@ -66,8 +66,6 @@ gg_effective_repro_all <- function(covid_effective_r){
       date_labels = "%d %b",
       expand = expansion(mult = c(0, 0.25))
     ) +
-    scale_colour_brewer(palette = "Paired") +
-    # scale_colour_viridis_d() +
     labs(
       title = paste(
         "7-day sliding window of effective reproduction number up to",
@@ -117,7 +115,6 @@ gg_effective_repro_facet <- function(covid_effective_r){
                Nick Tierney (Monash)
                Data source: European CDC"
   ) +
-    scale_colour_brewer(palette = "Paired") +
     theme_minimal() +
     theme(legend.position = "none")
 
@@ -170,7 +167,6 @@ gg_covid_cumulative_exceed_limit <- function(covid_data_limit,
                               segment.alpha = 0.2,
                               segment.size = 0.2
                              ) +
-    scale_colour_brewer(palette = "Paired") +
     theme(legend.position = "none") +
     labs(caption =
            "CC BY-NC-SA Tim Churches (UNSW)
