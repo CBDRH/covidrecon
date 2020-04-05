@@ -16,8 +16,9 @@ covid_prepare_estimate_repro <- function(covid_data){
 
 #' Fit EpiEstim::estimate_R to covid19 data
 #'
-#' This fits EpiEstim::estimate_R, with config values `mean_si = 5.0` and
-#'   `std_si = 3.0`. It assumes that the data is in the format provided by
+#' This fits EpiEstim::estimate_R, with config values `mean_si = 4.7` and
+#'   `std_si = 2.9` from https://doi.org/10.1101/2020.02.03.20019497
+#'   It assumes that the data is in the format provided by
 #'   `covid_prepare_estimate_repro`.
 #'
 #' @param covid_data_prepared data is in the format provided by
@@ -31,21 +32,9 @@ covid_estimate_repro <- function(covid_data_prepared,
                                  estimate_method = "parametric_si"){
   EpiEstim::estimate_R(covid_data_prepared,
                        method = estimate_method,
-                       # method="uncertain_si",
-                       config = EpiEstim::make_config(list(mean_si = 5.0,
-                                                           std_si = 3.0)))
-  # config = make_config(list(
-  # mean_si = 4.8,
-  # std_mean_si = 3.0,
-  # min_mean_si = 2,
-  # max_mean_si = 7.5,
-  # std_si = 3.0,
-  # std_std_si = 1.0,
-  # min_std_si = 0.5,
-  # max_std_si = 4.0,
-  # n1 = 1000,
-  # n2 = 1000)))
-}
+                       config = EpiEstim::make_config(list(mean_si = 4.7,
+                                                           std_si = 2.9)))
+ }
 
 #' Tidies up output from `EpiEstim::estimate_R`
 #'
