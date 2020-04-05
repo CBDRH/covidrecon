@@ -11,7 +11,8 @@ gg_covid_cases <- function(covid_data){
              y = cases,
              group = country_region)) +
     geom_line() +
-    scale_y_log10()
+    scale_y_log10() +
+    theme(panel.grid.minor = element_blank())
 }
 
 #' @export
@@ -22,7 +23,8 @@ gg_covid_cumulative_cases <- function(covid_data){
              y = cumulative_cases,
              group = country_region)) +
     geom_line() +
-    scale_y_log10()
+    scale_y_log10() +
+    theme(panel.grid.minor = element_blank())
 }
 
 
@@ -39,7 +41,7 @@ gg_effective_repro_all <- function(covid_effective_r){
 
   covid_effective_r %>%
     ggplot(aes(x = date,
-               y = mean_r,
+               y = median_r,
                colour = country_region)) +
     geom_line(size = 1,
               alpha = 0.75) +
@@ -80,7 +82,8 @@ gg_effective_repro_all <- function(covid_effective_r){
                Data source: European CDC"
     ) +
     theme_minimal() +
-    theme(legend.position = "none")
+    theme(legend.position = "none",
+          panel.grid.minor = element_blank())
 
 }
 
@@ -90,7 +93,7 @@ gg_effective_repro_facet <- function(covid_effective_r){
 
   ggplot(covid_effective_r,
        aes(x = date,
-           y = mean_r,
+           y = median_r,
            colour = country_region)) +
     geom_line(size = 1,
               alpha = 0.75) +
@@ -116,7 +119,8 @@ gg_effective_repro_facet <- function(covid_effective_r){
                Data source: European CDC"
   ) +
     theme_minimal() +
-    theme(legend.position = "none")
+    theme(legend.position = "none",
+          panel.grid.minor = element_blank())
 
 }
 
