@@ -110,19 +110,88 @@ gg_effective_repro_facet <- function(covid_effective_r){
   scale_x_date(date_breaks = "1 week",
                date_labels = "%d %b") +
   labs(
-    title = paste(
-      "7-day sliding window of effective reproduction number up to",
-      format(max(covid_effective_r$date), "%d %B %Y")
+    title = expression(paste(
+        "7-day sliding window of effective reproduction number ", R[t])
     ),
-    subtitle = "Outbreak is under control if effective R is under red line",
+    subtitle = expression(paste("Epidemic is in decay phase if ", R[t], "  is under red line")),
     x = "End date of 7-day sliding window",
-    y = "Effective R (log scale)",
-    caption = "Tim Churches (UNSW) & Nick Tierney (Monash)
-               Data source: European CDC"
+    y = expression(paste("Effective reproduction number ", R[t], " (log scale)")),
+    caption = paste("Tim Churches (UNSW) & Nick Tierney (Monash)
+               Data source: European CDC up to", format(max(covid_effective_r$date), "%d %B %Y"))
   ) +
     theme_minimal() +
     theme(legend.position = "none",
           panel.grid.minor = element_blank())
+
+}
+
+#' @name effective-repro-incidence
+#' @export
+gg_effective_repro_incidence_patchwork <- function(covid_effective_r,
+                                                   covid_data,
+                                                   country){
+
+      rplot <- covid_effective_r %>%
+        filter(country_region == country) %>%
+        ggplot(
+           aes(x = date,
+               y = median_r,
+               colour = country_region)) +
+        geom_line(size = 1,
+                  alpha = 0.75) +
+        geom_point(data = filter_last_country_date(
+                              covid_effective_r %>%
+                                filter(country_region == country)
+                          ),
+                   size = 2,
+                   alpha = 0.75) +
+      geom_hline(yintercept = 1.0, colour = "red") +
+      scale_y_log10() +
+      scale_x_date(date_breaks = "1 week",
+                   date_labels = "%d %b") +
+      labs(
+        title = expression(paste(
+            "7-day sliding window of effective reproduction number ", R[t])
+        ),
+        subtitle = expression(paste("Epidemic is in decay phase if ", R[t], "  is under red line")),
+        x = "End date of 7-day sliding window",
+        y = expression(paste( R[t], " (log scale)"))
+      ) +
+        theme_minimal() +
+        theme(legend.position = "none",
+              panel.grid.minor = element_blank()) +
+        theme(axis.text.x=element_text(angle=45, hjust=1))
+
+      first_date <- covid_effective_r %>%
+          filter(country_region == country) %>%
+          summarise(min_date = min(date)) %>%
+          pull(min_date)
+
+      iplot <-  covid_data %>%
+        mutate(date = as.Date(date)) %>%
+        filter(country_region == country,
+               date >= first_date) %>%
+        ggplot(
+           aes(x = date,
+               y = cases,
+               fill = country_region)) +
+      geom_col(stat="identity",
+                  alpha = 0.75) +
+      scale_x_date(date_breaks = "1 week",
+                   date_labels = "%d %b") +
+      labs(
+        title = "Incidence",
+        x = "Date",
+        y = "Incident cases",
+        caption = paste("Tim Churches (UNSW) & Nick Tierney (Monash)
+                   Data source: European CDC up to", format(max(covid_effective_r$date), "%d %B %Y"))
+      ) +
+        theme_minimal() +
+        theme(legend.position = "none",
+              panel.grid.minor = element_blank()) +
+        theme(axis.text.x=element_text(angle=45, hjust=1))
+
+      return( rplot / iplot )
 
 }
 

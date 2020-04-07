@@ -6,7 +6,7 @@
 \alias{gg_effective_repro_facet}
 \title{Plot effective reproduction number}
 \usage{
-gg_effective_repro_all(covid_effective_r)
+gg_effective_repro_all(covid_effective_r, highlight = "Australia")
 
 gg_effective_repro_facet(covid_effective_r)
 }

@@ -4,7 +4,11 @@
 \alias{gg_covid_cumulative_exceed_limit}
 \title{Base plot for creating cumulative cases of covid19 data}
 \usage{
-gg_covid_cumulative_exceed_limit(covid_data_limit, limit = 100)
+gg_covid_cumulative_exceed_limit(
+  covid_data_limit,
+  limit = 100,
+  highlight = "Australia"
+)
 }
 \arguments{
 \item{covid_data_limit}{\itemize{
@@ -14,6 +18,8 @@ gg_covid_cumulative_exceed_limit(covid_data_limit, limit = 100)
 
 \item{limit}{the number of days since reached a limit (added for
 titling graphic). Default is 100.}
+
+\item{highlight}{the name of the country to highlight, default is Australia.}
 }
 \value{
 ggplot plot
@@ -23,10 +29,10 @@ Base plot for creating cumulative cases of covid19 data
 }
 \examples{
 \dontrun{
- covid_data_since <- covid_data \%>\%
-   add_days_since_limit(limit = 100) \%>\%
-   dplyr::filter(days_since_limit >= 0) \%>\%
-   dplyr::filter(country_region \%in\% c("Australia", "New Zealand"))
+ covid_data_since <- covid_data %>%
+   add_days_since_limit(limit = 100) %>%
+   dplyr::filter(days_since_limit >= 0) %>%
+   dplyr::filter(country_region %in% c("Australia", "New Zealand"))
 
 gg_covid_cumulative_exceed_limit(covid_data_since)
 }

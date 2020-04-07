@@ -17,7 +17,8 @@ contains data of class "Date", and "I" contains cases.}
 estimated reproductive number
 }
 \description{
-This fits EpiEstim::estimate_R, with config values \code{mean_si = 5.0} and
-\code{std_si = 3.0}. It assumes that the data is in the format provided by
+This fits EpiEstim::estimate_R, with config values \code{mean_si = 4.7} and
+\code{std_si = 2.9} from https://doi.org/10.1101/2020.02.03.20019497
+It assumes that the data is in the format provided by
 \code{covid_prepare_estimate_repro}.
 }
