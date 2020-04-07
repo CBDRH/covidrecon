@@ -101,7 +101,7 @@ gg_effective_repro_facet <- function(covid_effective_r){
                size = 2,
                alpha = 0.75) +
   geom_hline(yintercept = 1.0, colour = "red") +
-  facet_wrap( ~ country_region, ncol = 2) +
+  facet_wrap( ~ country_region, ncol = 3) +
   scale_y_log10() +
   scale_x_date(date_breaks = "1 week",
                date_labels = "%d %b") +
@@ -130,6 +130,7 @@ gg_effective_repro_facet <- function(covid_effective_r){
 #'   (from [add_days_since_limit()])
 #' @param limit the number of days since reached a limit (added for
 #'   titling graphic). Default is 100.
+#' @param highlight the name of the country to highlight, default is Australia.
 #'
 #' @return ggplot plot
 #' @import ggplot2
@@ -144,21 +145,22 @@ gg_effective_repro_facet <- function(covid_effective_r){
 #' gg_covid_cumulative_exceed_limit(covid_data_since)
 #' }
 gg_covid_cumulative_exceed_limit <- function(covid_data_limit,
-                                             limit = 100){
+                                             limit = 100,
+                                             highlight = "Australia"){
 
   covid_data_last <- filter_last_country_date(covid_data_limit)
 
-  ggplot(data = covid_data_limit,
-         aes(x = days_since_limit,
+  covid_data_limit %>%
+    mutate(alfa = if_else(country_region == highlight, 1, 0.5)) %>%
+    ggplot(aes(x = days_since_limit,
              y = cumulative_cases,
              colour = country_region)) +
-    geom_line(size = 1,
-              alpha = 0.75) +
+    geom_line(aes(alpha=alfa), size = 1) +
     geom_point(data = covid_data_last,
-               size = 2,
-               alpha = 0.75) +
+               size = 2) +
     scale_y_log10(labels = scales::comma) +
     scale_x_continuous(expand = expansion(mult = c(0, 0.1))) +
+    scale_alpha(range=c(0.3, 1)) +
     theme_minimal() +
     labs(y = "Cumulative cases (logarithmic scale)",
          x = glue::glue("Days since cumulative cases exceeded {limit}"),
@@ -173,8 +175,7 @@ gg_covid_cumulative_exceed_limit <- function(covid_data_limit,
                              ) +
     theme(legend.position = "none") +
     labs(caption =
-           "CC BY-NC-SA Tim Churches (UNSW)
-  Nick Tierney (Monash)
-  Data source: European CDC"
+           "CC BY Tim Churches (UNSW) & Nick Tierney (Monash)
+            Data source: European CDC"
     )
 }
