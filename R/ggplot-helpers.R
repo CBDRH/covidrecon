@@ -35,24 +35,30 @@ gg_covid_cumulative_cases <- function(covid_data){
 #' @return ggplot2 plot
 #' @rdname effective-repro
 #' @export
-gg_effective_repro_all <- function(covid_effective_r){
+gg_effective_repro_all <- function(covid_effective_r,
+                                   highlight = "Australia"){
+
+  covid_effective_r <- covid_effective_r %>%
+    mutate(alfa = if_else(country_region == highlight, 1.0, 0.5),
+           alfa2 = if_else(country_region == highlight, 1.0, 0.75))
 
   last_country_eff_rs <- filter_last_country_date(covid_effective_r)
+
+  last_date <- format(max(covid_effective_r$date), "%d %B %Y")
 
   covid_effective_r %>%
     ggplot(aes(x = date,
                y = median_r,
                colour = country_region)) +
-    geom_line(size = 1,
-              alpha = 0.75) +
+    geom_line(aes(alpha=alfa),
+              size = 1) +
     geom_point(data = last_country_eff_rs,
                size = 2,
                alpha = 0.75) +
     geom_hline(yintercept = 1.0, colour = "red") +
     ggrepel::geom_label_repel(
       data = last_country_eff_rs,
-      aes(label = country_region),
-      segment.alpha = 0.3,
+      aes(label = country_region, alpha = alfa2),
       segment.size = 0.3,
       hjust = 0,
       # direction = "x",
@@ -68,18 +74,16 @@ gg_effective_repro_all <- function(covid_effective_r){
       date_labels = "%d %b",
       expand = expansion(mult = c(0, 0.25))
     ) +
+    scale_alpha(range=c(0.4, 1.0)) +
     labs(
-      title = paste(
-        "7-day sliding window of effective reproduction number up to",
-        format(max(covid_effective_r$date), "%d %B %Y")
+      title = expression(paste(
+        "7-day sliding window of effective reproduction number ", R[t])
       ),
-      subtitle = "Outbreak is under control if effective R is under red line",
+      subtitle = expression(paste("Epidemic is in decay phase if ", R[t], "  is under red line")),
       x = "End date of 7-day sliding window",
-      y = "Effective R (log scale)",
-      caption = "CC BY-NC-SA
-               Tim Churches (UNSW)
-               Nick Tierney (Monash)
-               Data source: European CDC"
+      y = expression(paste("Effective reproduction number ", R[t], " (log scale)")),
+      caption = paste("Tim Churches (UNSW) & Nick Tierney (Monash)
+               Data source: European CDC up to", last_date)
     ) +
     theme_minimal() +
     theme(legend.position = "none",
@@ -113,9 +117,7 @@ gg_effective_repro_facet <- function(covid_effective_r){
     subtitle = "Outbreak is under control if effective R is under red line",
     x = "End date of 7-day sliding window",
     y = "Effective R (log scale)",
-    caption = "CC BY-NC-SA
-               Tim Churches (UNSW)
-               Nick Tierney (Monash)
+    caption = "Tim Churches (UNSW) & Nick Tierney (Monash)
                Data source: European CDC"
   ) +
     theme_minimal() +
@@ -175,7 +177,7 @@ gg_covid_cumulative_exceed_limit <- function(covid_data_limit,
                              ) +
     theme(legend.position = "none") +
     labs(caption =
-           "CC BY Tim Churches (UNSW) & Nick Tierney (Monash)
+           "Tim Churches (UNSW) & Nick Tierney (Monash)
             Data source: European CDC"
     )
 }
