@@ -125,6 +125,7 @@ gg_effective_repro_facet <- function(covid_effective_r){
 
 }
 
+#' @title Effective Reproductive pathwork
 #' @name effective-repro-incidence
 #' @export
 gg_effective_repro_incidence_patchwork <- function(covid_effective_r,
