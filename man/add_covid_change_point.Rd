@@ -2,7 +2,7 @@
 % Please edit documentation in R/changepoint.R
 \name{add_covid_change_point}
 \alias{add_covid_change_point}
-\title{Adds changepoint date based on \code{changepoint::cpt.meanvar}}
+\title{Adds changepoint date based on \code{changepoint.np::cpt.np}}
 \usage{
 add_covid_change_point(covid_data, x = "cases", ...)
 }
@@ -11,11 +11,11 @@ add_covid_change_point(covid_data, x = "cases", ...)
 
 \item{x}{variable name (as character) of cases. Default is "cases".}
 
-\item{...}{params to pass to \code{changepoint::cpt.meanvar}}
+\item{...}{params to pass to \code{changepoint.np::cpt.np}}
 }
 \value{
 ggplot2 plot
 }
 \description{
-Adds changepoint date based on \code{changepoint::cpt.meanvar}
+Adds changepoint date based on \code{changepoint.np::cpt.np}
 }

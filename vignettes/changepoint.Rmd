@@ -24,6 +24,7 @@ library(ggplot2)
 covid <- covid_latest()
 covid_highest <- covid_high_incidence(covid)
 covid_changepoint <- add_covid_change_point(covid_highest)
+
 ```
 
 ```{r highlight-countries}
@@ -81,4 +82,5 @@ covid_highlighted %>%
     geom_line() +
     scale_y_log10()
 ```
+
 

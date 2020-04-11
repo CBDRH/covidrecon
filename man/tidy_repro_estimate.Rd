@@ -10,7 +10,7 @@ tidy_repro_estimate(covid_estimated_reproduction)
 \item{covid_estimated_reproduction}{output from \code{EpiEstim::estimate_R}}
 }
 \value{
-returns columns on estiamted isntant reproduction, and quantiles,
+returns columns on estiamted instantaneous reproduction, and quantiles,
 as well as dates.
 }
 \description{

@@ -40,7 +40,7 @@ covid_estimate_repro <- function(covid_data_prepared,
 #'
 #' @param covid_estimated_reproduction output from `EpiEstim::estimate_R`
 #'
-#' @return returns columns on estiamted isntant reproduction, and quantiles,
+#' @return returns columns on estiamted instantaneous reproduction, and quantiles,
 #'   as well as dates.
 #' @export
 tidy_repro_estimate <- function(covid_estimated_reproduction){

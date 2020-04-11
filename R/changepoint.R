@@ -15,6 +15,26 @@ extract_change_point_mean_var <- function(data,
   cpt_mean_var["cpt"]
 }
 
+#' Extract non-parametric changepoint
+#'
+#' @param data data.frame
+#' @param x variable name (as character) of cases. Default is "cases".
+#' @param ... params to pass to `changepoint.np::cpt.np`
+#'
+#' @return changepoint vars
+#' @export
+extract_first_np_change_point <- function(data,
+                                    x = "cases",
+                                    ...){
+  cpt_np <- changepoint.np::cpt.np(data[[x]],
+                                   method="PELT",
+                                   minseglen=5,
+                                   nquantiles =4*log(length(data)),
+                                   class = FALSE,
+                                           ...)
+  cpt_np[1]
+}
+
 #' Calculate changepoint date using `changepoint::cpt.meanvar`
 #'
 #' @param covid_data data.frame
@@ -39,7 +59,8 @@ covid_change_point <- function(covid_data,
     dplyr::group_by(geo_id) %>%
     tidyr::nest() %>%
     dplyr::mutate(change_day = purrr::map_dbl(data,
-                                              extract_change_point_mean_var,
+                                              extract_first_np_change_point,
+                                              # was: extract_change_point_mean_var,
                                               x,
                                               ...)) %>%
     tidyr::unnest(cols = c(data)) %>%
@@ -55,11 +76,11 @@ covid_change_point <- function(covid_data,
     dplyr::ungroup()
 }
 
-#' Adds changepoint date based on `changepoint::cpt.meanvar`
+#' Adds changepoint date based on `changepoint.np::cpt.np`
 #'
 #' @param covid_data data.frame
 #' @param x variable name (as character) of cases. Default is "cases".
-#' @param ... params to pass to `changepoint::cpt.meanvar`
+#' @param ... params to pass to `changepoint.np::cpt.np`
 #'
 #' @return ggplot2 plot
 #' @export
@@ -68,5 +89,8 @@ add_covid_change_point <- function(covid_data,
                                    ...){
   covid_data %>%
     covid_change_point(x, ...) %>%
-    dplyr::left_join(covid_data, by = "geo_id")
+    dplyr::left_join(covid_data, by = "geo_id") %>%
+    dplyr::mutate(days_since_changepoint = as.integer(difftime(date,
+                                                               change_point_date,
+                                                               units="days")))
 }
