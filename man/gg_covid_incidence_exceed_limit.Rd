@@ -7,7 +7,9 @@
 gg_covid_incidence_exceed_limit(
   covid_data_limit,
   limit = NULL,
-  highlight = "Australia"
+  highlight = "Australia",
+  smooth = FALSE,
+  span = 0.1
 )
 }
 \arguments{

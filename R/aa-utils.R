@@ -30,7 +30,7 @@ create_title_date <- function(covid_data){
 }
 
 
-#' Difference in dayes between two dates
+#' Difference in days between two dates
 #'
 #' @param x first date
 #' @param y second date

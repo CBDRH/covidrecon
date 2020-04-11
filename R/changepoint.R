@@ -47,7 +47,7 @@ covid_change_point <- function(covid_data,
                                x = "cases",
                                ...){
 
-  covid_data %>%
+  covid_data <- covid_data %>%
     add_country_row_id() %>%
     dplyr::group_by(geo_id) %>%
     # dplyr::filter(cumulative_cases > 0) %>%
@@ -67,8 +67,9 @@ covid_change_point <- function(covid_data,
     dplyr::select(-year,
                   -month,
                   -day,
-                  -n_obs)  %>%
-    # dplyr::filter(country_region %in% c("Italy","United_Kingdom")) %>% View()
+                  -n_obs)
+
+  covid_data %>%
     dplyr::filter(n_days == change_day) %>%
     dplyr::rename(change_point_date = date) %>%
     dplyr::select(geo_id,
@@ -90,6 +91,8 @@ add_covid_change_point <- function(covid_data,
   covid_data %>%
     covid_change_point(x, ...) %>%
     dplyr::left_join(covid_data, by = "geo_id") %>%
+    # monkey-patch the NZ changepoint
+    dplyr::mutate(change_point_date = ifelse(country_region == "New_Zealand", ymd("2020-03-18"), change_point_date)) %>%
     dplyr::mutate(days_since_changepoint = as.integer(difftime(date,
                                                                change_point_date,
                                                                units="days")))

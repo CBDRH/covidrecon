@@ -259,6 +259,55 @@ gg_covid_cumulative_exceed_limit <- function(covid_data_limit,
     )
 }
 
+#' Base plot for creating cumulative cases vs deaths of covid19 data
+#'
+#' @param covid_data_limit - covid19 with added limit
+#'   (from [add_days_since_limit()])
+#' @param limit the number of days since reached a limit (added for
+#'   titling graphic). Default is 100.
+#' @param highlight the name of the country to highlight, default is Australia.
+#'
+#' @return ggplot plot
+#' @import ggplot2
+#' @export
+gg_covid_cumulative_cases_deaths_exceed_limit <- function(covid_data_limit,
+                                             limit = NULL,
+                                             highlight = "Australia"){
+
+  covid_data_last <- filter_last_country_date(covid_data_limit)
+
+  if (!is.null(limit)) {
+    x_axis_lab <- glue::glue("Days since cumulative cases exceeded {limit}")
+  } else {
+    x_axis_lab <- "Days since commencement of epidemic in each country"
+  }
+
+  covid_data_limit %>%
+    mutate(alfa = if_else(country_region == highlight, 1, 0.5)) %>%
+    ggplot(aes(x = days_since_limit,
+             y = cumulative_cases)) +
+    geom_line(aes(colour=cumulative_deaths), size = 2) +
+    geom_point(data = covid_data_last,
+               aes(colour=cumulative_deaths),
+               size = 3) +
+    facet_wrap(country_region~.) +
+    scale_y_log10(labels = scales::comma) +
+    scale_x_continuous(expand = expansion(mult = c(0, 0.1))) +
+    # scale_alpha(range=c(0.3, 1)) +
+    theme_minimal() +
+    labs(y = "Cumulative cases (logarithmic scale)",
+         x = x_axis_lab,
+         title = create_title_date(covid_data_limit)) +
+    # geom_text(data = covid_data_last,
+    #                           aes(label = underscore_to_space(country_region)),
+    #                          size = 4) +
+    theme(legend.position = "right") +
+    labs(caption =
+           "Tim Churches (UNSW) & Nick Tierney (Monash)
+            Data source: European CDC"
+    )
+}
+
 #' Base plot for creating incident cases chart of covid19 data
 #'
 #' @param covid_data_limit - covid19 with added limit
@@ -285,18 +334,20 @@ gg_covid_incidence_exceed_limit <- function(covid_data_limit,
                                              smooth=FALSE,
                                              span=0.1){
 
-  covid_data_last <- filter_last_country_date(covid_data_limit)
-
   if (!is.null(limit)) {
     x_axis_lab <- glue::glue("Days since daily incident cases exceeded {limit}")
   } else {
     x_axis_lab <- "Days since commencement of epidemic in each country"
   }
 
-  if (smooth) {
+  if (TRUE) { # was if (smooth)
     covid_data_limit <- covid_data_limit %>%
-      mutate(cases = ifelse(cases == 0, NA, cases))
+      mutate(cases = ifelse(cases == 0, NA, cases)) %>%
+      group_by(country_region) %>%
+      filter(!(days_since_limit == max(days_since_limit) & is.na(cases)))
   }
+
+  covid_data_last <- filter_last_country_date(covid_data_limit)
 
   p1 <- covid_data_limit %>%
     mutate(alfa = if_else(country_region == highlight, 1, 0.5)) %>%
@@ -312,19 +363,20 @@ gg_covid_incidence_exceed_limit <- function(covid_data_limit,
     y_label <- "Daily incident cases (logarithmic scale)"
   } else {
     p1 <- p1 +
-      geom_smooth(aes(alpha=alfa), se=FALSE, size = 1, span=span) +
-      geom_point(data = covid_data_last,
-                 size = 2)
+      geom_smooth(aes(alpha=alfa), se=FALSE, size = 1, span=span)
     y_label <- "Smoothed daily incident cases (logarithmic scale)"
   }
 
-  p1 +
+  p1 <- p1 +
     scale_x_continuous(expand = expansion(mult = c(0, 0.1))) +
     scale_alpha(range=c(0.3, 1)) +
     theme_minimal() +
     labs(y = "Daily incident cases (logarithmic scale)",
          x = x_axis_lab,
-         title = create_title_date(covid_data_limit)) +
+         title = create_title_date(covid_data_limit))
+
+  if (!smooth) {
+    p1 <- p1 +
     ggrepel::geom_text_repel(data = covid_data_last,
                               aes(label = underscore_to_space(country_region)),
                              size = 4,
@@ -332,7 +384,22 @@ gg_covid_incidence_exceed_limit <- function(covid_data_limit,
                               # direction = "x",
                               segment.alpha = 0.2,
                               segment.size = 0.2
-                             ) +
+                             )
+  } else {
+     p1 <- p1 +
+    ggrepel::geom_label_repel(data = covid_data_last,
+                              aes(label = underscore_to_space(country_region)),
+                             size = 4,
+                              nudge_x = 4 ,
+                              # direction = "x",
+                              segment.alpha = 0.3,
+                              # segment.size = 0.2,
+                              # arrow = arrow(length = unit(0.02, "npc"))
+                             )
+
+  }
+
+  p1 +
     theme(legend.position = "none") +
     labs(caption =
            "Tim Churches (UNSW) & Nick Tierney (Monash)

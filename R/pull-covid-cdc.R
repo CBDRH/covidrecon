@@ -79,6 +79,7 @@ covid_latest <- function(patch = TRUE,
     dplyr::arrange(date) %>%
     dplyr::group_by(geo_id) %>%
     dplyr::mutate(cumulative_cases = cumsum(cases),
+                  cumulative_deaths = cumsum(deaths),
                   week = lubridate::week(date)) %>%
     dplyr::ungroup() %>%
     dplyr::select(date,
@@ -86,6 +87,7 @@ covid_latest <- function(patch = TRUE,
                   deaths,
                   cases,
                   cumulative_cases,
+                  cumulative_deaths,
                   year,
                   month,
                   week,
