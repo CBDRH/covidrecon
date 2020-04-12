@@ -29,10 +29,10 @@ Base plot for creating cumulative cases of covid19 data
 }
 \examples{
 \dontrun{
- covid_data_since <- covid_data %>%
-   add_days_since_limit(limit = 100) %>%
-   dplyr::filter(days_since_limit >= 0) %>%
-   dplyr::filter(country_region %in% c("Australia", "New Zealand"))
+ covid_data_since <- covid_data \%>\%
+   add_days_since_limit(limit = 100) \%>\%
+   dplyr::filter(days_since_limit >= 0) \%>\%
+   dplyr::filter(country_region \%in\% c("Australia", "New Zealand"))
 
 gg_covid_cumulative_exceed_limit(covid_data_since)
 }

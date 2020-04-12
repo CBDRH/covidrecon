@@ -31,6 +31,7 @@ gg_covid_cumulative_cases <- function(covid_data){
 #' Plot effective reproduction number
 #'
 #' @param covid_effective_r covid19 data with estimated effective R
+#' @param highlight character vector of countries to highlight. Default, "Australia"
 #'
 #' @return ggplot2 plot
 #' @rdname effective-repro
@@ -39,8 +40,18 @@ gg_effective_repro_all <- function(covid_effective_r,
                                    highlight = "Australia"){
 
   covid_effective_r <- covid_effective_r %>%
-    mutate(alfa = if_else(country_region == highlight, 1.0, 0.5),
-           alfa2 = if_else(country_region == highlight, 1.0, 0.75))
+    dplyr::mutate(
+      alfa = dplyr::if_else(
+        condition = country_region == highlight,
+        true = 1.0,
+        false = 0.5
+        ),
+      alfa2 = dplyr::if_else(
+        condition = country_region == highlight,
+        true = 1.0,
+        false = 0.75
+        )
+      )
 
   last_country_eff_rs <- filter_last_country_date(covid_effective_r)
 
@@ -125,15 +136,19 @@ gg_effective_repro_facet <- function(covid_effective_r){
 
 }
 
-#' @title Effective Reproductive pathwork
-#' @name effective-repro-incidence
+#' Effective Reproductive pathwork
+#'
+#' @param covid_data covid19 data
+#' @param covid_effective_r covid19 data with effective repro added with
+#'   `covid_estimate_repro()`.
+#' @param country country to display
 #' @export
 gg_effective_repro_incidence_patchwork <- function(covid_effective_r,
                                                    covid_data,
                                                    country){
 
       rplot <- covid_effective_r %>%
-        filter(country_region == country) %>%
+        dplyr::filter(country_region == country) %>%
         ggplot(
            aes(x = date,
                y = median_r,
@@ -142,7 +157,7 @@ gg_effective_repro_incidence_patchwork <- function(covid_effective_r,
                   alpha = 0.75) +
         geom_point(data = filter_last_country_date(
                               covid_effective_r %>%
-                                filter(country_region == country)
+                                dplyr::filter(country_region == country)
                           ),
                    size = 2,
                    alpha = 0.75) +
@@ -164,13 +179,15 @@ gg_effective_repro_incidence_patchwork <- function(covid_effective_r,
         theme(axis.text.x=element_text(angle=45, hjust=1))
 
       first_date <- covid_effective_r %>%
-          filter(country_region == country) %>%
-          summarise(min_date = min(date) - days(7)) %>%
-          pull(min_date)
+          dplyr::filter(country_region == country) %>%
+          dplyr::summarise(
+            min_date = min(date) - lubridate::days(7)
+            ) %>%
+          dplyr::pull(min_date)
 
       iplot <-  covid_data %>%
-        mutate(date = as.Date(date)) %>%
-        filter(country_region == country,
+        dplyr::mutate(date = as.Date(date)) %>%
+        dplyr::filter(country_region == country,
                date >= first_date) %>%
         ggplot(
            aes(x = date,
@@ -230,7 +247,13 @@ gg_covid_cumulative_exceed_limit <- function(covid_data_limit,
   }
 
   covid_data_limit %>%
-    mutate(alfa = if_else(country_region == highlight, 1, 0.5)) %>%
+    dplyr::mutate(
+      alfa = dplyr::if_else(
+        condition = country_region == highlight,
+        true = 1,
+        false = 0.5
+        )
+      ) %>%
     ggplot(aes(x = days_since_limit,
              y = cumulative_cases,
              colour = country_region)) +
@@ -283,7 +306,13 @@ gg_covid_cumulative_cases_deaths_exceed_limit <- function(covid_data_limit,
   }
 
   covid_data_limit %>%
-    mutate(alfa = if_else(country_region == highlight, 1, 0.5)) %>%
+    dplyr::mutate(
+      alfa = dplyr::if_else(
+        condition = country_region == highlight,
+        true = 1,
+        false = 0.5
+        )
+      ) %>%
     ggplot(aes(x = days_since_limit,
              y = cumulative_cases)) +
     geom_line(aes(colour=cumulative_deaths), size = 2) +
@@ -315,6 +344,8 @@ gg_covid_cumulative_cases_deaths_exceed_limit <- function(covid_data_limit,
 #' @param limit the number of days since reached a limit (added for
 #'   titling graphic). Default is 100.
 #' @param highlight the name of the country to highlight, default is Australia.
+#' @param smooth add smoother, default is false
+#' @param span span numeric, span to add to smoother.
 #'
 #' @return ggplot plot
 #' @import ggplot2
@@ -342,15 +373,27 @@ gg_covid_incidence_exceed_limit <- function(covid_data_limit,
 
   if (TRUE) { # was if (smooth)
     covid_data_limit <- covid_data_limit %>%
-      mutate(cases = ifelse(cases == 0, NA, cases)) %>%
-      group_by(country_region) %>%
-      filter(!(days_since_limit == max(days_since_limit) & is.na(cases)))
+      dplyr::mutate(
+        cases = ifelse(
+          test = cases == 0,
+          yes = NA,
+          no = cases
+          )
+        ) %>%
+      dplyr::group_by(country_region) %>%
+      dplyr::filter(!(days_since_limit == max(days_since_limit) & is.na(cases)))
   }
 
   covid_data_last <- filter_last_country_date(covid_data_limit)
 
   p1 <- covid_data_limit %>%
-    mutate(alfa = if_else(country_region == highlight, 1, 0.5)) %>%
+    dplyr::mutate(
+      alfa = dplyr::if_else(
+        condition = country_region == highlight,
+        true = 1,
+        false = 0.5
+        )
+      ) %>%
     ggplot(aes(x = days_since_limit,
              y = cases,
              colour = country_region))

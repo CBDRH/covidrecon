@@ -12,6 +12,8 @@ gg_effective_repro_facet(covid_effective_r)
 }
 \arguments{
 \item{covid_effective_r}{covid19 data with estimated effective R}
+
+\item{highlight}{character vector of countries to highlight. Default, "Australia"}
 }
 \value{
 ggplot2 plot

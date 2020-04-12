@@ -40,7 +40,8 @@ Imports:
     changepoint,
     ggrepel,
     vctrs,
-    memoise
+    memoise,
+    changepoint.np
 Suggests: 
     knitr,
     rmarkdown,

@@ -1,6 +1,8 @@
 if(getRversion() >= "2.15.1")  utils::globalVariables(c("."))
 globalVariables(
-  c("cases",
+  c("alfa",
+    "alfa2",
+    "cases",
     "change_day",
     "change_point_date",
     "clabel_value",
@@ -10,6 +12,7 @@ globalVariables(
     "country_region",
     "covid",
     "cumulative_cases",
+    "cumulative_deaths",
     "data",
     "date_rep",
     "date_since_limit_cases",
@@ -30,7 +33,9 @@ globalVariables(
     "lead_date",
     "long",
     "mean_r",
+    "median_r",
     "month",
+    "min_date",
     "n_days",
     "n_double",
     "n_obs",

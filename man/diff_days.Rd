@@ -2,7 +2,7 @@
 % Please edit documentation in R/aa-utils.R
 \name{diff_days}
 \alias{diff_days}
-\title{Difference in dayes between two dates}
+\title{Difference in days between two dates}
 \usage{
 diff_days(x, y)
 }
@@ -15,5 +15,5 @@ diff_days(x, y)
 numeric number of days
 }
 \description{
-Difference in dayes between two dates
+Difference in days between two dates
 }

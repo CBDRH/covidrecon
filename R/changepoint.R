@@ -93,7 +93,13 @@ add_covid_change_point <- function(covid_data,
     dplyr::left_join(covid_data, by = "geo_id") %>%
     # monkey-patch the NZ changepoint
     # dplyr::mutate(change_point_date = ifelse(country_region == "New_Zealand", lubridate::ymd("2020-03-18", tz="UTC"), change_point_date)) %>%
-    dplyr::mutate(change_point_date = if_else(country_region == "New_Zealand", lubridate::ymd_hm("2020-03-18 00:00"), change_point_date)) %>%
+    dplyr::mutate(
+      change_point_date = dplyr::if_else(
+        condition = country_region == "New_Zealand",
+        true = lubridate::ymd_hm("2020-03-18 00:00"),
+        false = change_point_date
+        )
+      ) %>%
     dplyr::mutate(days_since_changepoint = as.integer(difftime(date,
                                                                change_point_date,
                                                                units="days")))
