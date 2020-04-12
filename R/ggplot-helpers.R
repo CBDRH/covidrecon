@@ -146,6 +146,12 @@ gg_effective_repro_facet <- function(covid_effective_r){
 gg_effective_repro_incidence_patchwork <- function(covid_effective_r,
                                                    covid_data,
                                                    country){
+  first_date <- covid_effective_r %>%
+          dplyr::filter(country_region == country) %>%
+          dplyr::summarise(
+            min_date = min(date) - lubridate::days(7)
+            ) %>%
+          dplyr::pull(min_date)
 
   title_text <- paste0(country,
                          ": sliding window effective reproduction number")
@@ -170,7 +176,8 @@ gg_effective_repro_incidence_patchwork <- function(covid_effective_r,
       geom_hline(yintercept = 1.0, colour = "red") +
       scale_y_log10() +
       scale_x_date(date_breaks = "1 week",
-                   date_labels = "%d %b") +
+                   date_labels = "%d %b",
+                   limits=c(first_date, NA)) +
       labs(
         title = title_text,
         subtitle = expression(paste("Epidemic is in decay phase if ", R[t], "  is under red line")),
@@ -182,12 +189,6 @@ gg_effective_repro_incidence_patchwork <- function(covid_effective_r,
               panel.grid.minor = element_blank()) +
         theme(axis.text.x=element_text(angle=45, hjust=1))
 
-      first_date <- covid_effective_r %>%
-          dplyr::filter(country_region == country) %>%
-          dplyr::summarise(
-            min_date = min(date) - lubridate::days(7)
-            ) %>%
-          dplyr::pull(min_date)
 
       tcountry <- country
       if (country == "South Korea") {
@@ -205,12 +206,14 @@ gg_effective_repro_incidence_patchwork <- function(covid_effective_r,
       geom_col(stat="identity",
                   alpha = 0.75) +
       scale_x_date(date_breaks = "1 week",
-                   date_labels = "%d %b") +
-      scale_y_log10() +
+                   date_labels = "%d %b",
+                   limits=c(first_date, NA)) +
+      # scale_y_log10() +
       labs(
         title = paste0(tcountry, ": COVID-19 incidence"),
         x = "Date",
-        y = "Incident cases\n(log scale)",
+        y = "Incident cases",
+        # y = "Incident cases\n(log scale)",
         caption = paste("Tim Churches (UNSW) & Nick Tierney (Monash)
                    Data source: European CDC up to", format(max(covid_effective_r$date), "%d %B %Y"))
       ) +

@@ -25,16 +25,27 @@ covid_prepare_estimate_repro <- function(covid_data){
 #'   `covid_prepare_estimate_repro`, with columns "dates" and "I", where "dates"
 #'   contains data of class "Date", and "I" contains cases.
 #' @param estimate_method default is "parametric_si"
+#' @param si_sample
+#' @param config
 #'
 #' @return estimated reproductive number
 #' @export
 covid_estimate_repro <- function(covid_data_prepared,
-                                 estimate_method = "parametric_si"){
-  EpiEstim::estimate_R(covid_data_prepared,
+                                 estimate_method = "parametric_si",
+                                 si_sample=NULL,
+                                 config=EpiEstim::make_config(list(mean_si = 4.7,
+                                                           std_si = 2.9))){
+  if (estimate_method ==  "parametric_si") {
+    EpiEstim::estimate_R(covid_data_prepared,
                        method = estimate_method,
-                       config = EpiEstim::make_config(list(mean_si = 4.7,
-                                                           std_si = 2.9)))
- }
+                       config = config)
+  } else if (estimate_method ==  "si_from_sample"){
+    EpiEstim::estimate_R(covid_data_prepared,
+                       method = estimate_method,
+                       si_sample=si_sample,
+                       config = config)
+  }
+}
 
 #' Tidies up output from `EpiEstim::estimate_R`
 #'
@@ -58,17 +69,26 @@ tidy_repro_estimate <- function(covid_estimated_reproduction){
 #' Fits instnat reproduction for each country
 #'
 #' @param covid_data covid19 data
+#' @param estimate_method
+#' @param config
 #'
 #' @return data.frame with several list columns containing various output of
 #'   `EpiEstim::estimate_R`.
 #' @export
-estimate_repro_all <- function(covid_data){
+estimate_repro_all <- function(covid_data,
+                               estimate_method = "parametric_si",
+                               si_sample=NULL,
+                               config=EpiEstim::make_config(list(mean_si = 4.7,
+                                                           std_si = 2.9))){
   covid_data %>%
     dplyr::group_by(geo_id) %>%
     tidyr::nest() %>%
     dplyr::mutate(prepared_data = purrr::map(data, covid_prepare_estimate_repro),
                   repro_estimate = purrr::map(prepared_data,
-                                              purrr::safely(covid_estimate_repro)),
+                                              purrr::safely(covid_estimate_repro),
+                                                            estimate_method=estimate_method,
+                                                            si_sample=si_sample,
+                                                            config=config),
                   repro_result = purrr::map(repro_estimate,
                                             purrr::pluck,
                                             "result"),
@@ -116,9 +136,15 @@ country_repro_errors <- function(covid_data_estimated){
 #' @return data.frame with covid19 columns plus output of `EpiEstim::estimate_R`
 #'  and columns on estimated mean R values and quantiles etc.
 #' @export
-add_instant_reproduction <- function(covid_data){
+add_instant_reproduction <- function(covid_data,
+                                     estimate_method = "parametric_si",
+                                     si_sample = NULL,
+                                     config=EpiEstim::make_config(list(mean_si = 4.7,
+                                                           std_si = 2.9))){
   tidy_instant <- covid_data %>%
-    estimate_repro_all() %>%
+    estimate_repro_all(estimate_method=estimate_method,
+                       si_sample=si_sample,
+                       config=config) %>%
     augment_estimate_repro()
 
   covid_data %>%

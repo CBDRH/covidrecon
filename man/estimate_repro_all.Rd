@@ -4,10 +4,17 @@
 \alias{estimate_repro_all}
 \title{Fits instnat reproduction for each country}
 \usage{
-estimate_repro_all(covid_data)
+estimate_repro_all(
+  covid_data,
+  estimate_method = "parametric_si",
+  si_sample = NULL,
+  config = EpiEstim::make_config(list(mean_si = 4.7, std_si = 2.9))
+)
 }
 \arguments{
 \item{covid_data}{covid19 data}
+
+\item{config}{}
 }
 \value{
 data.frame with several list columns containing various output of

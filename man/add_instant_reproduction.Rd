@@ -4,7 +4,12 @@
 \alias{add_instant_reproduction}
 \title{Add instant reproduction number measures to provided covid19 data}
 \usage{
-add_instant_reproduction(covid_data)
+add_instant_reproduction(
+  covid_data,
+  estimate_method = "parametric_si",
+  si_sample = NULL,
+  config = EpiEstim::make_config(list(mean_si = 4.7, std_si = 2.9))
+)
 }
 \arguments{
 \item{covid_data}{covid19 data}
