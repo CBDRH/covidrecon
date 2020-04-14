@@ -20,89 +20,35 @@ knitr::opts_chunk$set(
 
 R tools for monitoring effectiveness of COVID-19 control efforts
 
-<!-- COVID-19 + RECON suite of tools for outbreak epidemiology + R = COVIDreconoitR -->
-COVID-19 + RECON suite of tools for outbreak epidemiology + R = covidrecon
-
 ## Installation
 
 The development version from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("CBDRH/COVIDreconnoitR")
+devtools::install_github("CBDRH/covidrecon")
 ```
-## Example
 
+## Why Another COVID19 R package?
 
-```{r example}
+We created an [open source dashboard](https://cbdrh.github.io/ozcoviz/) to combine value-adding data visualisations with updated statistical analysis not yet widely seen. We decided to package up a lot of the code used in the dashboard into this R package.
+
+Now, there are many other R packages for pulling COVID19 data, so why create another one? A few reasons. The main one being that the COVID9 data formats, and other other R packages are changing rapidly. We wanted to perform statistical analysis that aren't widely available. We needed to ensure the data stayed in a format that was easily usable for our purposes. We needed something that we could control and add features to ourselves, that wouldn't need to rely on from another person.
+
+This package is still changing and evolving, and it's primary purpose is to implement code
+
+## Usage
+
+`covidrecon` is designed to add statistical analysis and data visualisations of covid19 data. It was created to power [this dashboard](https://cbdrh.github.io/ozcoviz/).
+
+### Pulling data
+
+The data source that we recommend using is from the European CDC. You can get this data with `covid_latest()`. This will by default cache the data downloaded for that day. Here is what the data looks like.
+
+```{r covid-ecdc}
 library(covidrecon)
-## basic example code
+covid <- covid_latest()
+covid
 ```
 
-```{r get-latest-data}
-provinces_confirmed_jh <- covid_pull_data()
-provinces_confirmed_jh
-```
-
-```{r high-incidence-countries}
-library(dplyr)
-high_incidence_countries <- covid_high_incidence(provinces_confirmed_jh) %>% 
-  mutate(alpha = ifelse(country_region == "Australia", 1, 0.7)) %>% 
-  filter(normalised_date >= 0)
-
-high_incidence_countries
-```
-
-
-```{r plot}
-library(ggplot2)
-ggplot(data = high_incidence_countries,
-         aes(x = normalised_date, 
-             y = cumulative_cases,
-             colour = country_region)) +
-  geom_line(aes(alpha = alpha),
-            size = 1.2) +
-  scale_y_log10() +
-  theme_minimal() +
-  theme(legend.position = "none")
-
-```
-
-```{r highlight-selected-countries}
-library(gghighlight)
-selected_countries <- c("China",
-                        "Singapore",
-                        "Japan",
-                        "Iran",
-                        "Italy",
-                        "Spain",
-                        "US",
-                        "United Kingdom",
-                        "Australia",
-                        "France",
-                        "Korea, South")
-
-ggplot(data = high_incidence_countries,
-         aes(x = normalised_date, 
-             y = cumulative_cases,
-             colour = country_region)) +
-  # geom_line(aes(alpha = alpha), 
-  #           size = 1.2) +
-  geom_line() + 
-   facet_wrap(~ continent, ncol = 2) +
-  scale_y_log10() +
-  theme_minimal() +
-  theme(legend.position = "none") +
-  gghighlight(
-      country_region %in% c(
-        selected_countries
-      ),
-      label_params = list(size = 2,
-                          nudge_y = 10,
-                          segment.alpha = 0.2),
-      calculate_per_facet = TRUE,
-      use_group_by = FALSE
-    )
-
-```
-
+For full use of the package and the data visualisations, we recommend that you look at the dashboard, [`ozcovis`](https://cbdrh.github.io/ozcoviz/).

@@ -9,11 +9,6 @@
 
 R tools for monitoring effectiveness of COVID-19 control efforts
 
-<!-- COVID-19 + RECON suite of tools for outbreak epidemiology + R = COVIDreconoitR -->
-
-COVID-19 + RECON suite of tools for outbreak epidemiology + R =
-covidrecon
-
 ## Installation
 
 The development version from [GitHub](https://github.com/) with:
@@ -23,116 +18,65 @@ The development version from [GitHub](https://github.com/) with:
 devtools::install_github("CBDRH/covidrecon")
 ```
 
-## Example
+## Why Another COVID19 R package?
+
+We created an [open source dashboard](https://cbdrh.github.io/ozcoviz/)
+to combine value-adding data visualisations with updated statistical
+analysis not yet widely seen. We decided to package up a lot of the code
+used in the dashboard into this R package.
+
+Now, there are many other R packages for pulling COVID19 data, so why
+create another one? A few reasons. The main one being that the COVID9
+data formats, and other other R packages are changing rapidly. We wanted
+to perform statistical analysis that aren’t widely available. We needed
+to ensure the data stayed in a format that was easily usable for our
+purposes. We needed something that we could control and add features to
+ourselves, that wouldn’t need to rely on from another person.
+
+This package is still changing and evolving, and it’s primary purpose is
+to implement code
+
+## Usage
+
+`covidrecon` is designed to add statistical analysis and data
+visualisations of covid19 data. It was created to power [this
+dashboard](https://cbdrh.github.io/ozcoviz/).
+
+### Pulling data
+
+The data source that we recommend using is from the European CDC. You
+can get this data with `covid_latest()`. This will by default cache the
+data downloaded for that day. Here is what the data looks like.
 
 ``` r
 library(covidrecon)
-## basic example code
+covid <- covid_latest()
+#> New names:
+#> * dateRep -> date_rep
+#> * countriesAndTerritories -> countries_and_territories
+#> * geoId -> geo_id
+#> * countryterritoryCode -> countryterritory_code
+#> * popData2018 -> pop_data2018
+#> covid data extracted from 2019-12-31 UTC to 2020-04-13 UTC
+covid
+#> # A tibble: 10,537 x 13
+#>    date                country_region deaths cases cumulative_cases
+#>    <dttm>              <chr>           <dbl> <dbl>            <dbl>
+#>  1 2020-03-03 00:00:00 Andorra             0     1                1
+#>  2 2020-03-14 00:00:00 Andorra             0     1                2
+#>  3 2020-03-16 00:00:00 Andorra             0     3                5
+#>  4 2020-03-17 00:00:00 Andorra             0     9               14
+#>  5 2020-03-18 00:00:00 Andorra             0     0               14
+#>  6 2020-03-19 00:00:00 Andorra             0    39               53
+#>  7 2020-03-20 00:00:00 Andorra             0    22               75
+#>  8 2020-03-21 00:00:00 Andorra             0     0               75
+#>  9 2020-03-22 00:00:00 Andorra             0    13               88
+#> 10 2020-03-23 00:00:00 Andorra             0    25              113
+#> # … with 10,527 more rows, and 8 more variables: cumulative_deaths <dbl>,
+#> #   year <dbl>, month <dbl>, week <dbl>, day <dbl>, geo_id <chr>,
+#> #   countryterritory_code <chr>, pop_data2018 <dbl>
 ```
 
-``` r
-provinces_confirmed_jh <- covid_pull_data()
-provinces_confirmed_jh
-#> # A tibble: 27,144 x 8
-#>    province country_region   lat  long date       cumulative_cases
-#>    <chr>    <chr>          <dbl> <dbl> <date>                <dbl>
-#>  1 <NA>     Afghanistan       33    65 2020-01-22                0
-#>  2 <NA>     Afghanistan       33    65 2020-01-23                0
-#>  3 <NA>     Afghanistan       33    65 2020-01-24                0
-#>  4 <NA>     Afghanistan       33    65 2020-01-25                0
-#>  5 <NA>     Afghanistan       33    65 2020-01-26                0
-#>  6 <NA>     Afghanistan       33    65 2020-01-27                0
-#>  7 <NA>     Afghanistan       33    65 2020-01-28                0
-#>  8 <NA>     Afghanistan       33    65 2020-01-29                0
-#>  9 <NA>     Afghanistan       33    65 2020-01-30                0
-#> 10 <NA>     Afghanistan       33    65 2020-01-31                0
-#> # … with 27,134 more rows, and 2 more variables: incident_cases <dbl>,
-#> #   continent <chr>
-```
-
-``` r
-library(dplyr)
-#> 
-#> Attaching package: 'dplyr'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     filter, lag
-#> The following objects are masked from 'package:base':
-#> 
-#>     intersect, setdiff, setequal, union
-high_incidence_countries <- covid_high_incidence(provinces_confirmed_jh) %>% 
-  mutate(alpha = ifelse(country_region == "Australia", 1, 0.7)) %>% 
-  filter(normalised_date >= 0)
-
-high_incidence_countries
-#> # A tibble: 573 x 9
-#>    country_region date       incident_cases cumulative_cases hit_100  rnum
-#>    <chr>          <date>              <dbl>            <dbl> <lgl>   <int>
-#>  1 Armenia        2020-03-19             31              115 TRUE       58
-#>  2 Australia      2020-03-10             16              107 TRUE       49
-#>  3 Australia      2020-03-11             21              128 FALSE      50
-#>  4 Australia      2020-03-12              0              128 FALSE      51
-#>  5 Australia      2020-03-13             72              200 FALSE      52
-#>  6 Australia      2020-03-14             50              250 FALSE      53
-#>  7 Australia      2020-03-15             47              297 FALSE      54
-#>  8 Australia      2020-03-16             80              377 FALSE      55
-#>  9 Australia      2020-03-17             75              452 FALSE      56
-#> 10 Australia      2020-03-18            116              568 FALSE      57
-#> # … with 563 more rows, and 3 more variables: normalised_date <int>,
-#> #   continent <chr>, alpha <dbl>
-```
-
-``` r
-library(ggplot2)
-ggplot(data = high_incidence_countries,
-         aes(x = normalised_date, 
-             y = cumulative_cases,
-             colour = country_region)) +
-  geom_line(aes(alpha = alpha),
-            size = 1.2) +
-  scale_y_log10() +
-  theme_minimal() +
-  theme(legend.position = "none")
-```
-
-<img src="man/figures/README-plot-1.png" width="100%" />
-
-``` r
-library(gghighlight)
-selected_countries <- c("China",
-                        "Singapore",
-                        "Japan",
-                        "Iran",
-                        "Italy",
-                        "Spain",
-                        "US",
-                        "United Kingdom",
-                        "Australia",
-                        "France",
-                        "Korea, South")
-
-ggplot(data = high_incidence_countries,
-         aes(x = normalised_date, 
-             y = cumulative_cases,
-             colour = country_region)) +
-  # geom_line(aes(alpha = alpha), 
-  #           size = 1.2) +
-  geom_line() + 
-   facet_wrap(~ continent, ncol = 2) +
-  scale_y_log10() +
-  theme_minimal() +
-  theme(legend.position = "none") +
-  gghighlight(
-      country_region %in% c(
-        selected_countries
-      ),
-      label_params = list(size = 2,
-                          nudge_y = 10,
-                          segment.alpha = 0.2),
-      calculate_per_facet = TRUE,
-      use_group_by = FALSE
-    )
-#> label_key: country_region
-```
-
-<img src="man/figures/README-highlight-selected-countries-1.png" width="100%" />
+For full use of the package and the data visualisations, we recommend
+that you look at the dashboard,
+[`ozcovis`](https://cbdrh.github.io/ozcoviz/).
