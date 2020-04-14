@@ -16,6 +16,7 @@ knitr::opts_chunk$set(
 # covidrecon
 
 <!-- badges: start -->
+[![DOI](https://zenodo.org/badge/248728805.svg)](https://zenodo.org/badge/latestdoi/248728805)
 <!-- badges: end -->
 
 R tools for monitoring effectiveness of COVID-19 control efforts
