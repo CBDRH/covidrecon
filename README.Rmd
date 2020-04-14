@@ -52,4 +52,14 @@ covid <- covid_latest()
 covid
 ```
 
+This contains new names for the data (from European CDC)
+
+- dateRep --> date_rep
+- countriesAndTerritories --> countries_and_territories
+- geoId --> geo_id
+- countryterritoryCode --> countryterritory_code
+- popData2018 --> pop_data2018
+
+
 For full use of the package and the data visualisations, we recommend that you look at the dashboard, [`ozcovis`](https://cbdrh.github.io/ozcoviz/).
+

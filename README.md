@@ -5,6 +5,7 @@
 
 <!-- badges: start -->
 
+[![DOI](https://zenodo.org/badge/248728805.svg)](https://zenodo.org/badge/latestdoi/248728805)
 <!-- badges: end -->
 
 R tools for monitoring effectiveness of COVID-19 control efforts
@@ -51,12 +52,6 @@ data downloaded for that day. Here is what the data looks like.
 ``` r
 library(covidrecon)
 covid <- covid_latest()
-#> New names:
-#> * dateRep -> date_rep
-#> * countriesAndTerritories -> countries_and_territories
-#> * geoId -> geo_id
-#> * countryterritoryCode -> countryterritory_code
-#> * popData2018 -> pop_data2018
 #> covid data extracted from 2019-12-31 UTC to 2020-04-13 UTC
 covid
 #> # A tibble: 10,537 x 13
@@ -76,6 +71,14 @@ covid
 #> #   year <dbl>, month <dbl>, week <dbl>, day <dbl>, geo_id <chr>,
 #> #   countryterritory_code <chr>, pop_data2018 <dbl>
 ```
+
+This contains new names for the data (from European CDC)
+
+  - dateRep –\> date\_rep
+  - countriesAndTerritories –\> countries\_and\_territories
+  - geoId –\> geo\_id
+  - countryterritoryCode –\> countryterritory\_code
+  - popData2018 –\> pop\_data2018
 
 For full use of the package and the data visualisations, we recommend
 that you look at the dashboard,
