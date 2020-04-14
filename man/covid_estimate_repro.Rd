@@ -8,7 +8,7 @@ covid_estimate_repro(
   covid_data_prepared,
   estimate_method = "parametric_si",
   si_sample = NULL,
-  config = EpiEstim::make_config(list(mean_si = 4.7, std_si = 2.9))
+  config = list(mean_si = 4.7, std_si = 2.9)
 )
 }
 \arguments{
@@ -18,7 +18,10 @@ contains data of class "Date", and "I" contains cases.}
 
 \item{estimate_method}{default is "parametric_si"}
 
-\item{config}{}
+\item{si_sample}{SI samples. Default is NULL.}
+
+\item{config}{named list of values to pass to EpiEstim::make_config. Default
+is \code{mean_si = 4.7}, and \code{std_si = 2.9}.}
 }
 \value{
 estimated reproductive number

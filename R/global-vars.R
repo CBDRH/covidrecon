@@ -48,6 +48,8 @@ globalVariables(
     "prepared_data",
     "province",
     "province_state",
+    "quantile_0_025_r",
+    "quantile_0_975_r",
     "repro_estimate",
     "repro_result",
     "result",

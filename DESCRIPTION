@@ -41,10 +41,11 @@ Imports:
     ggrepel,
     vctrs,
     memoise,
-    changepoint.np
+    changepoint.np,
 Suggests: 
     knitr,
     rmarkdown,
+    patchwork,
     gghighlight
 VignetteBuilder: knitr
 RoxygenNote: 7.1.0

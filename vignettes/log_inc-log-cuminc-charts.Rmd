@@ -1,8 +1,12 @@
 ---
-title: "Untitled"
+title: "Log incidence cumulative incidence"
 author: "Tim Churches"
 date: "29/03/2020"
-output: html_document
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Log incidence cumulative incidence}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
@@ -11,7 +15,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r, fig.height=20, fig,width=12, meassage=FALSE}
-library(tidyverse)
+library(dplyr)
+library(tibble)
+library(ggplot2)
 library(lubridate)
 library(patchwork)
 library(EpiEstim)
