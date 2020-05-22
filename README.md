@@ -10,6 +10,8 @@
 
 R tools for monitoring effectiveness of COVID-19 control efforts
 
+See also https://github.com/CBDRH/ozcoviz
+
 ## Installation
 
 The development version from [GitHub](https://github.com/) with:
