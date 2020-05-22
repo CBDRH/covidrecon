@@ -52,9 +52,21 @@ data downloaded for that day. Here is what the data looks like.
 ``` r
 library(covidrecon)
 covid <- covid_latest()
-#> covid data extracted from 2019-12-31 UTC to 2020-04-13 UTC
+#> New names:
+#> * dateRep -> date_rep
+#> * countriesAndTerritories -> countries_and_territories
+#> * geoId -> geo_id
+#> * countryterritoryCode -> countryterritory_code
+#> * popData2018 -> pop_data2018
+#> New names:
+#> * dateRep -> date_rep
+#> * countriesAndTerritories -> countries_and_territories
+#> * geoId -> geo_id
+#> * countryterritoryCode -> countryterritory_code
+#> * popData2018 -> pop_data2018
+#> covid data extracted from 2019-12-31 UTC to 2020-04-14 UTC
 covid
-#> # A tibble: 10,537 x 13
+#> # A tibble: 10,742 x 13
 #>    date                country_region deaths cases cumulative_cases
 #>    <dttm>              <chr>           <dbl> <dbl>            <dbl>
 #>  1 2020-03-03 00:00:00 Andorra             0     1                1
@@ -67,7 +79,7 @@ covid
 #>  8 2020-03-21 00:00:00 Andorra             0     0               75
 #>  9 2020-03-22 00:00:00 Andorra             0    13               88
 #> 10 2020-03-23 00:00:00 Andorra             0    25              113
-#> # … with 10,527 more rows, and 8 more variables: cumulative_deaths <dbl>,
+#> # … with 10,732 more rows, and 8 more variables: cumulative_deaths <dbl>,
 #> #   year <dbl>, month <dbl>, week <dbl>, day <dbl>, geo_id <chr>,
 #> #   countryterritory_code <chr>, pop_data2018 <dbl>
 ```

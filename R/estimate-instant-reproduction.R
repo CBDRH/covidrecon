@@ -10,6 +10,7 @@ covid_prepare_estimate_repro <- function(covid_data){
     dplyr::ungroup() %>%
     # EpiEstim::estimate_R requires a specific format of data
     dplyr::mutate(date = as.Date(date)) %>%
+    dplyr::mutate(cases = if_else(cases < 0, 0, cases)) %>%
     dplyr::select(dates = date,
                   I = cases)
 }
