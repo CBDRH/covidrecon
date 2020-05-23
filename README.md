@@ -6,6 +6,9 @@
 <!-- badges: start -->
 
 [![DOI](https://zenodo.org/badge/248728805.svg)](https://zenodo.org/badge/latestdoi/248728805)
+
+[![eRum2020::CovidR](https://badgen.net/https/runkit.io/erum2020-covidr/badge/branches/master/churches-tierney-ozcoviz-dashboard-covidrecon-package?cache=300)](https://milano-r.github.io/erum2020-covidr-contest/churches-tierney-ozcoviz-dashboard-covidrecon-package.html)
+
 <!-- badges: end -->
 
 R tools for monitoring effectiveness of COVID-19 control efforts
